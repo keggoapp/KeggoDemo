@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keggo. — What's On Tonight</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Fredoka:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #F2E4C4; --cream-deep: #E7D6AC; --paper: #f7eed6;
+      --ink: #1A1715; --ink-soft: #2a2724;
+      --tomato: #D84A2A; --tomato-deep: #b73b1f;
+      --honey: #F4B944; --green: #2A4A35; --green-deep: #1b3224;
+      --grey-600: #605a51; --grey-400: #968e7f; --grey-200: #d9d0bb;
+      --card: #ffffff;
+      --radius: 16px; --radius-sm: 10px;
+      --shadow-hard: 5px 5px 0 var(--ink);
+      --shadow-tomato: 5px 5px 0 var(--tomato);
+      --shadow-green: 5px 5px 0 var(--green);
+      --shadow-honey: 5px 5px 0 var(--honey);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --border-w: 2.5px;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .fade-up { animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .scale-in { animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .spin { animation: spin 1s linear infinite; }
+
+    .header { background: var(--cream); border-bottom: 3px solid var(--ink); position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-mark { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.03em; color: var(--ink); }
+    .logo-mark .dot { color: var(--tomato); }
+    .beta-tag { display: inline-block; background: var(--tomato); color: var(--cream); font-family: 'Fredoka', sans-serif; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 100px; letter-spacing: 0.5px; margin-left: 4px; vertical-align: middle; border: 1.5px solid var(--ink); }
+    .nav-pills { display: flex; gap: 4px; }
+    .nav-pill { padding: 8px 18px; border-radius: 100px; border: var(--border-w) solid var(--ink); background: var(--cream); color: var(--ink); font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all var(--transition); position: relative; }
+    .nav-pill:hover { background: var(--card); box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
+    .nav-pill.active { background: var(--ink); color: var(--cream); box-shadow: 3px 3px 0 var(--tomato); }
+    .nav-pill .badge { position: absolute; top: -8px; right: -8px; background: var(--tomato); color: var(--cream); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border: 2px solid var(--ink); font-family: 'Fredoka', sans-serif; }
+    .user-menu { display: flex; align-items: center; gap: 8px; }
+    .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); color: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 700; border: 2px solid var(--ink); }
+    .user-name { font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; }
+    .logout-btn { padding: 6px 14px; border: var(--border-w) solid var(--ink); background: var(--cream); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ink); transition: all var(--transition); }
+    .logout-btn:hover { background: var(--tomato); color: var(--cream); box-shadow: 2px 2px 0 var(--ink); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; flex: 1; }
+    .hero { text-align: center; padding: 40px 24px 8px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream); border: 2px solid var(--ink); color: var(--green); font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 100px; margin-bottom: 16px; box-shadow: 3px 3px 0 var(--green); }
+    .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .hero h2 { font-family: 'Fredoka', sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; color: var(--ink); }
+    .hero h2 em { font-family: 'Caveat', cursive; color: var(--tomato); font-style: normal; font-size: 1.1em; font-weight: 700; }
+    .hero p { color: var(--ink-soft); font-size: 16px; max-width: 440px; margin: 0 auto 32px; }
+    .hero-scribble { font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; color: var(--tomato); transform: rotate(-3deg); display: block; margin-bottom: 10px; }
+
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-input-wrap { flex: 1; position: relative; }
+    .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--grey-400); }
+    .search-input-wrap input { width: 100%; padding: 12px 14px 12px 42px; border: var(--border-w) solid var(--ink); border-radius: 100px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--card); color: var(--ink); transition: all var(--transition); outline: none; }
+    .search-input-wrap input:focus { box-shadow: 3px 3px 0 var(--tomato); }
+    .search-input-wrap input::placeholder { color: var(--grey-400); }
+    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-select { padding: 10px 14px; border: var(--border-w) solid var(--ink); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 500; background: var(--card); color: var(--ink); cursor: pointer; transition: all var(--transition); outline: none; min-width: 150px; }
+    .filter-select:focus { box-shadow: 3px 3px 0 var(--honey); }
+    .clear-btn { padding: 10px 16px; border: var(--border-w) solid var(--ink); background: var(--card); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--tomato); transition: all var(--transition); }
+    .clear-btn:hover { background: var(--tomato); color: var(--cream); box-shadow: 3px 3px 0 var(--ink); }
+
+    .location-input-wrap { display: flex; gap: 8px; align-items: center; }
+    .location-input { flex: 1; padding: 10px 14px; border: var(--border-w) solid var(--ink); border-radius: 100px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--card); color: var(--ink); outline: none; transition: all var(--transition); }
+    .location-input:focus { box-shadow: 3px 3px 0 var(--green); }
+    .location-btn { padding: 10px 18px; border: var(--border-w) solid var(--ink); background: var(--green); color: var(--cream); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--transition); box-shadow: 3px 3px 0 var(--ink); }
+    .location-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+
+    .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .cat-chip { padding: 7px 16px; border-radius: 100px; border: var(--border-w) solid var(--ink); background: var(--card); font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); color: var(--ink); display: flex; align-items: center; gap: 6px; }
+    .cat-chip:hover { background: var(--cream); box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
+    .cat-chip.active { background: var(--ink); color: var(--cream); box-shadow: 3px 3px 0 var(--tomato); }
+
+    .results-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .results-bar .count { font-size: 13px; color: var(--grey-600); font-weight: 500; font-family: 'Inter', sans-serif; }
+    .results-bar .count strong { color: var(--ink); font-weight: 700; }
+    .view-btns { display: flex; gap: 2px; background: var(--cream-deep); border-radius: 100px; padding: 3px; border: 2px solid var(--ink); }
+    .view-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 50%; cursor: pointer; color: var(--grey-400); transition: all var(--transition); }
+    .view-btn.active { background: var(--ink); color: var(--cream); }
+
+    /* ---- EVENT CARDS ---- */
+    .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .card { background: var(--card); border-radius: 18px; border: var(--border-w) solid var(--ink); overflow: hidden; transition: all 0.2s ease; position: relative; cursor: pointer; box-shadow: var(--shadow-hard); }
+    .card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+    .card-image-wrap { position: relative; overflow: hidden; }
+    .card-image { width: 100%; height: 180px; object-fit: cover; background: var(--cream); display: block; border-bottom: var(--border-w) solid var(--ink); }
+    .card-icon-badge { position: absolute; top: 10px; left: 10px; width: 38px; height: 38px; background: var(--cream); border: 2.5px solid var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 var(--ink); }
+    .card-icon-badge svg { width: 20px; height: 20px; }
+    .card-content { padding: 16px; }
+    .card-cat-tag { display: inline-flex; align-items: center; gap: 5px; font-family: 'Fredoka', sans-serif; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; border: 2px solid var(--ink); }
+    .card-title { font-family: 'Fredoka', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 6px; line-height: 1.2; color: var(--ink); letter-spacing: -0.01em; }
+    .card-venue-link { font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; color: var(--green); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
+    .card-venue-link:hover { color: var(--tomato); }
+    .card-meta { display: flex; gap: 12px; font-size: 12px; color: var(--ink-soft); margin-bottom: 12px; margin-top: 6px; font-family: 'Inter', sans-serif; }
+    .card-meta span { display: flex; align-items: center; gap: 3px; }
+    .card-badges { display: flex; gap: 6px; align-items: center; }
+    .card-badge { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--cream); color: var(--ink); border: 2px solid var(--ink); font-size: 12px; font-weight: 700; cursor: pointer; transition: all var(--transition); }
+    .card-badge:hover { background: var(--tomato); color: var(--cream); box-shadow: 2px 2px 0 var(--ink); }
+
+    .events-list { display: flex; flex-direction: column; gap: 12px; }
+    .list-item { background: var(--card); border: var(--border-w) solid var(--ink); border-left: 5px solid var(--ink); border-radius: var(--radius-sm); padding: 16px; display: flex; gap: 16px; align-items: flex-start; cursor: pointer; transition: all var(--transition); box-shadow: 4px 4px 0 var(--ink); }
+    .list-item:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+    .list-item-img { width: 100px; height: 80px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--cream); border: 2px solid var(--ink); }
+    .list-item-body { flex: 1; }
+    .list-item-title { font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .list-item-meta { font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+    .list-item-desc { font-size: 13px; color: var(--ink); line-height: 1.4; }
+    .list-item-venue { font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 4px; }
+
+    .map-wrap { display: grid; grid-template-columns: 1fr 320px; gap: 0; background: var(--card); border-radius: var(--radius); border: var(--border-w) solid var(--ink); overflow: hidden; height: 480px; box-shadow: 6px 6px 0 var(--ink); }
+    .map-frame { width: 100%; height: 100%; border: none; z-index: 1; }
+    .map-sidebar { max-height: 560px; overflow-y: auto; border-left: var(--border-w) solid var(--ink); padding: 8px; z-index: 10; background: var(--cream); }
+    .map-event-chip { display: flex; gap: 10px; padding: 10px; background: white; border: 2px solid var(--ink); border-radius: 12px; margin-bottom: 8px; cursor: pointer; font-size: 12px; transition: all var(--transition); overflow: hidden; box-shadow: 3px 3px 0 var(--ink); }
+    .map-event-chip:hover, .map-event-chip.active { background: var(--cream); box-shadow: 3px 3px 0 var(--tomato); border-color: var(--tomato); }
+    .map-event-chip-img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--cream); border: 2px solid var(--ink); }
+    .map-event-chip-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .map-event-chip-title { font-family: 'Fredoka', sans-serif; font-weight: 700; margin-bottom: 3px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+    .map-event-chip-venue { font-family: 'Fredoka', sans-serif; font-size: 11px; color: var(--green); font-weight: 600; margin-bottom: 3px; }
+    .map-event-chip-meta { font-size: 11px; color: var(--ink-soft); margin-bottom: 3px; }
+    .map-event-chip-price { font-family: 'Fredoka', sans-serif; font-size: 12px; font-weight: 700; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,23,21,0.65); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+    .modal { background: var(--card); border-radius: 20px; padding: 28px; max-width: 480px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); }
+    .detail-modal { background: var(--card); border-radius: 20px; padding: 28px; max-width: 520px; width: 100%; max-height: 85vh; overflow-y: auto; position: relative; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--tomato); }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: var(--cream); border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; color: var(--ink); font-size: 18px; transition: all var(--transition); font-family: monospace; z-index: 1; }
+    .modal-close:hover { background: var(--tomato); color: var(--cream); }
+
+    .login-tabs { display: flex; gap: 0; margin-bottom: 24px; border: var(--border-w) solid var(--ink); border-radius: 100px; overflow: hidden; }
+    .login-tab { flex: 1; padding: 12px; text-align: center; background: var(--cream); border: none; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all var(--transition); }
+    .login-tab.active { background: var(--ink); color: var(--cream); }
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field label { font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+    .form-field input { padding: 11px 16px; border: var(--border-w) solid var(--ink); border-radius: 100px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--cream); color: var(--ink); outline: none; transition: all var(--transition); }
+    .form-field input:focus { box-shadow: 3px 3px 0 var(--tomato); }
+    .form-error { color: var(--tomato); font-family: 'Fredoka', sans-serif; font-size: 12px; font-weight: 600; }
+    .oauth-btns { display: flex; gap: 10px; }
+    .oauth-btn { flex: 1; padding: 10px 12px; border: var(--border-w) solid var(--ink); background: var(--card); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink); transition: all var(--transition); }
+    .oauth-btn:hover { background: var(--cream); box-shadow: 3px 3px 0 var(--ink); }
+    .form-submit { padding: 12px 24px; background: var(--tomato); color: var(--cream); border: var(--border-w) solid var(--ink); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all var(--transition); margin-top: 8px; box-shadow: 4px 4px 0 var(--ink); }
+    .form-submit:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+
+    .detail-poster { width: 100%; height: 280px; object-fit: cover; border-radius: 14px; margin-bottom: 20px; background: var(--cream); display: block; border: var(--border-w) solid var(--ink); }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .detail-title { font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; flex: 1; color: var(--ink); line-height: 1.1; }
+    .detail-actions { display: flex; gap: 8px; }
+    .detail-action-btn { width: 40px; height: 40px; border-radius: 50%; border: var(--border-w) solid var(--ink); background: var(--cream); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); color: var(--ink); }
+    .detail-action-btn:hover { background: var(--tomato); color: var(--cream); box-shadow: 2px 2px 0 var(--ink); }
+    .detail-action-btn.saved { background: var(--tomato); color: var(--cream); }
+    .detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .detail-info-item { padding: 14px; background: var(--cream); border-radius: 12px; border: 2px solid var(--ink); }
+    .detail-info-label { font-family: 'Fredoka', sans-serif; font-size: 11px; font-weight: 600; color: var(--grey-600); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .detail-info-value { font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 700; color: var(--ink); }
+    .detail-description { font-size: 14px; line-height: 1.6; color: var(--ink); margin-bottom: 20px; padding: 14px; background: var(--cream); border-radius: 12px; border: 2px solid var(--ink); }
+    .google-map-embed { width: 100%; height: 180px; border-radius: 12px; border: 2px solid var(--ink); }
+
+    .form-panel { background: var(--card); border: var(--border-w) solid var(--ink); border-radius: 20px; padding: 36px; max-width: 640px; margin: 0 auto; box-shadow: 6px 6px 0 var(--ink); }
+    .form-panel h2 { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+    .form-panel .subtitle { color: var(--ink-soft); font-size: 14px; margin-bottom: 28px; }
+    .poster-upload { border: 3px dashed var(--ink); border-radius: 14px; padding: 24px; text-align: center; cursor: pointer; transition: all var(--transition); margin-bottom: 24px; background: var(--cream); }
+    .poster-upload:hover { background: var(--card); box-shadow: 4px 4px 0 var(--honey); }
+    .poster-upload input[type="file"] { display: none; }
+    .poster-upload-content { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .poster-upload-icon { font-size: 28px; color: var(--grey-400); }
+    .poster-upload-text { font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+    .poster-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; background: var(--cream); border: 2px solid var(--ink); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid.full { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 2px; }
+    .field label { font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+    .field input, .field select, .field textarea { padding: 10px 14px; border: var(--border-w) solid var(--ink); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--cream); color: var(--ink); outline: none; transition: all var(--transition); }
+    .field input:focus, .field select:focus, .field textarea:focus { box-shadow: 3px 3px 0 var(--tomato); }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+    .btn-primary { padding: 11px 24px; background: var(--tomato); color: var(--cream); border: var(--border-w) solid var(--ink); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all var(--transition); box-shadow: 4px 4px 0 var(--ink); }
+    .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+    .btn-ghost { padding: 11px 24px; background: var(--cream); color: var(--ink); border: var(--border-w) solid var(--ink); border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all var(--transition); }
+    .btn-ghost:hover { background: var(--card); box-shadow: 3px 3px 0 var(--ink); }
+
+    /* ---- VENUE PROFILE ---- */
+    .profile-card { background: var(--card); border: var(--border-w) solid var(--ink); border-radius: 20px; max-width: 700px; margin: 0 auto; overflow: hidden; box-shadow: 6px 6px 0 var(--ink); }
+    .profile-hero { width: 100%; height: 200px; object-fit: cover; border-bottom: var(--border-w) solid var(--ink); background: var(--cream); }
+    .profile-body { padding: 28px; }
+    .profile-name { font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+    .profile-area { font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 16px; }
+    .profile-bio { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 20px; }
+    .profile-section-title { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .profile-section-title .scribble { font-family: 'Caveat', cursive; color: var(--tomato); font-size: 18px; transform: rotate(-3deg); display: inline-block; }
+    .service-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .service-tag { font-family: 'Fredoka', sans-serif; font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 100px; border: 2px solid var(--ink); background: var(--cream); color: var(--ink); display: flex; align-items: center; gap: 5px; }
+    .service-tag.active { background: var(--green); color: var(--cream); }
+    .service-tag.toggle { cursor: pointer; transition: all var(--transition); }
+    .service-tag.toggle:hover { box-shadow: 2px 2px 0 var(--ink); }
+    .hours-grid { display: grid; grid-template-columns: 80px 1fr; gap: 6px 16px; margin-bottom: 20px; font-size: 13px; }
+    .hours-day { font-family: 'Fredoka', sans-serif; font-weight: 600; color: var(--ink); }
+    .hours-time { color: var(--ink-soft); }
+    .profile-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; color: var(--tomato); text-decoration: none; padding: 8px 18px; border: 2px solid var(--ink); border-radius: 100px; background: var(--cream); transition: all var(--transition); }
+    .profile-link:hover { background: var(--tomato); color: var(--cream); box-shadow: 3px 3px 0 var(--ink); }
+
+    .explore-tabs { display: flex; gap: 0; margin-bottom: 24px; border: var(--border-w) solid var(--ink); border-radius: 100px; overflow: hidden; max-width: 260px; }
+    .explore-tab { flex: 1; padding: 10px 20px; text-align: center; background: var(--cream); border: none; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all var(--transition); }
+    .explore-tab.active { background: var(--ink); color: var(--cream); }
+    .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .venue-card { background: var(--card); border-radius: 18px; border: var(--border-w) solid var(--ink); overflow: hidden; transition: all 0.2s ease; cursor: pointer; box-shadow: var(--shadow-hard); }
+    .venue-card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+    .venue-card-img { width: 100%; height: 160px; object-fit: cover; background: var(--cream); display: block; border-bottom: var(--border-w) solid var(--ink); }
+    .venue-card-body { padding: 16px; }
+    .venue-card-name { font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+    .venue-card-area { font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 8px; }
+    .venue-card-bio { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .venue-card-services { display: flex; gap: 5px; flex-wrap: wrap; }
+    .venue-card-services .mini-tag { font-family: 'Fredoka', sans-serif; font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 100px; border: 1.5px solid var(--ink); background: var(--cream); color: var(--ink); }
+    .sport-sub-tag { font-family: 'Fredoka', sans-serif; font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 100px; border: 2px solid var(--ink); background: var(--cream); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; }
+
+    .cat-chips-sport { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; background: var(--green); padding: 12px 14px; border-radius: 14px; border: var(--border-w) solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+    .cat-chips-sport .cat-chip { border-color: rgba(255,255,255,0.25); color: var(--cream); background: rgba(255,255,255,0.08); }
+    .cat-chips-sport .cat-chip:hover { background: rgba(255,255,255,0.2); box-shadow: 2px 2px 0 rgba(255,255,255,0.3); transform: translate(-1px,-1px); }
+    .cat-chips-sport .cat-chip.active { background: var(--cream); color: var(--ink); border-color: var(--cream); box-shadow: 2px 2px 0 rgba(0,0,0,0.25); }
+    .cat-chips-more { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; padding: 12px 14px; border-radius: 14px; border: var(--border-w) dashed var(--grey-400); background: var(--cream); }
+    .cat-chip img { width: 18px; height: 18px; pointer-events: none; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: 12px 24px; border-radius: 100px; font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--tomato); z-index: 10001; animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 8px; }
+    .empty { text-align: center; padding: 64px 24px; color: var(--grey-400); }
+    .empty h3 { font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .footer { text-align: center; padding: 32px 24px; border-top: 3px solid var(--ink); margin-top: 40px; background: var(--cream); }
+    .footer-links { display: flex; gap: 16px; justify-content: center; margin-bottom: 8px; }
+    .footer-links a { color: var(--ink); text-decoration: none; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; transition: color var(--transition); }
+    .footer-links a:hover { color: var(--tomato); }
+    .footer p { font-size: 12px; color: var(--grey-600); }
+
+    /* ---- Google Places Autocomplete ---- */
+    .pac-container { border: 2.5px solid var(--ink) !important; border-radius: 12px !important; box-shadow: 4px 4px 0 var(--ink) !important; font-family: 'Inter', sans-serif !important; margin-top: 4px !important; background: var(--card) !important; }
+    .pac-item { padding: 8px 14px !important; font-size: 13px !important; cursor: pointer !important; border-top: 1px solid var(--grey-200) !important; }
+    .pac-item:hover { background: var(--cream) !important; }
+    .pac-item-query { font-family: 'Fredoka', sans-serif !important; font-weight: 600 !important; font-size: 14px !important; }
+    .pac-icon { display: none !important; }
+
+    @media (max-width: 768px) {
+      .header-inner { gap: 12px; }
+      .nav-pills { display: none; }
+      .events-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .hero h2 { font-size: 28px; }
+      .modal, .detail-modal { padding: 20px; }
+      .filter-row { flex-direction: column; }
+      .map-wrap { grid-template-columns: 1fr; height: auto; }
+      .map-wrap .map-frame { height: 300px; }
+      .map-sidebar { max-height: 300px; border-left: none; border-top: var(--border-w) solid var(--ink); }
+      .detail-info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZ7TpD33-fiGsc85FnDJbHl9OKuz3wXkM&libraries=places&callback=Function.prototype"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo, useEffect, useRef, useCallback } = React;
+
+    /* --- Supabase client --- */
+    const SUPABASE_URL = "https://znfjzdkrhxeghkjavmcv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZmp6ZGtyaHhlZ2hramF2bWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Nzg0ODIsImV4cCI6MjA5MjI1NDQ4Mn0.ih9oYj8AkuCasDm36Cqz8eCGzgPMxLOWSCAlSY78Izc";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const LOCATION_LOOKUP = {
+      "Addlestone": { lat: 51.3685, lng: -0.4940 },
+      "Chertsey": { lat: 51.392116, lng: -0.502990 },
+      "Weybridge": { lat: 51.3740, lng: -0.4570 },
+      "KT15": { lat: 51.3685, lng: -0.4940 },
+      "KT16": { lat: 51.392116, lng: -0.502990 },
+      "KT13": { lat: 51.3740, lng: -0.4570 },
+    };
+
+    const DISTANCE_OPTIONS = [
+      { val: 0, label: "Any distance" },
+      { val: 1, label: "Within 1 mile" },
+      { val: 2, label: "Within 2 miles" },
+      { val: 5, label: "Within 5 miles" },
+      { val: 10, label: "Within 10 miles" },
+    ];
+
+    /* Local pub photos — filenames match the pub name exactly, e.g. "The Pelican.png".
+       Folder: Demo Site Images/Pub Profiles/ (relative to Keggo.html). */
+    const VENUE_PHOTO_DIR = "Demo Site Images/Pub Profiles";
+    const VENUE_PUB_NAMES = [
+      "The Pelican",
+      "The White Hart",
+      "The Cricketers",
+      "The Crown Hotel",
+      "The Olde Swan",
+      "The Coach & Horses",
+      "The Old Crown",
+      "The Minnow",
+      "The Jolly Farmer",
+      "The Queen's Head",
+    ];
+    const VENUE_IMAGES_DEFAULT = VENUE_PUB_NAMES.reduce((acc, name) => {
+      // encodeURI handles spaces, apostrophes and ampersands in the filename safely
+      acc[name] = encodeURI(`${VENUE_PHOTO_DIR}/${name}.png`);
+      return acc;
+    }, {});
+
+    function getVenueImage(name, profiles) {
+      if (profiles && profiles[name] && profiles[name].photo) return profiles[name].photo;
+      if (VENUE_IMAGES_DEFAULT[name]) return VENUE_IMAGES_DEFAULT[name];
+      return null;
+    }
+
+    /* Venue profiles — venues can edit these */
+    const ALL_SERVICES = [
+      "Beer Garden", "Dog Friendly", "Food Served", "Real Ales", "Sports TV",
+      "Wi-Fi", "Car Park", "Wheelchair Access", "Family Friendly",
+      "Outdoor Seating", "Function Room", "Late Licence", "Sunday Roasts",
+      "Live Music", "Quiz Nights", "Karaoke", "Comedy Nights", "Live Sport",
+      "Pool Table", "Darts", "Jukebox", "Board Games",
+    ];
+
+    const DEFAULT_PROFILES = {
+      "The Pelican": { displayName: "The Pelican", address: "26 Church Road, Addlestone KT15 1EL", bio: "A proper local at the heart of Addlestone. Cask ales, home-cooked food, and a warm welcome since 1842.", website: "https://thepelican-addlestone.co.uk", photo: null, services: ["Beer Garden", "Dog Friendly", "Food Served", "Real Ales", "Wi-Fi", "Quiz Nights", "Sunday Roasts"], hours: { Mon: "12:00 \u2013 23:00", Tue: "12:00 \u2013 23:00", Wed: "12:00 \u2013 23:00", Thu: "12:00 \u2013 23:30", Fri: "12:00 \u2013 00:00", Sat: "11:00 \u2013 00:00", Sun: "11:00 \u2013 22:30" } },
+      "The White Hart": { displayName: "The White Hart", address: "43 High Street, Addlestone KT15 1HQ", bio: "Traditional high-street pub with a stage for live acts and an open mic every Friday.", website: "", photo: null, services: ["Live Music", "Food Served", "Real Ales", "Pool Table", "Comedy Nights", "Darts"], hours: { Mon: "14:00 \u2013 23:00", Tue: "14:00 \u2013 23:00", Wed: "14:00 \u2013 23:00", Thu: "14:00 \u2013 23:00", Fri: "12:00 \u2013 00:00", Sat: "12:00 \u2013 00:00", Sun: "12:00 \u2013 22:30" } },
+      "The Cricketers": { displayName: "The Cricketers", address: "Cricketers Lane, Addlestone KT15 1ST", bio: "Charming pub tucked behind the village green. Sunday roasts are legendary.", website: "", photo: null, services: ["Beer Garden", "Food Served", "Family Friendly", "Car Park", "Sunday Roasts", "Outdoor Seating"], hours: { Mon: "12:00 \u2013 22:00", Tue: "12:00 \u2013 22:00", Wed: "12:00 \u2013 22:00", Thu: "12:00 \u2013 22:00", Fri: "12:00 \u2013 23:00", Sat: "11:00 \u2013 23:00", Sun: "11:00 \u2013 21:00" } },
+      "The Crown Hotel": { displayName: "The Crown Hotel", address: "London Street, Chertsey KT16 8AB", bio: "Historic coaching inn at the centre of Chertsey. Saturday karaoke is an institution.", website: "https://thecrownchertsey.co.uk", photo: null, services: ["Food Served", "Real Ales", "Wi-Fi", "Car Park", "Wheelchair Access", "Karaoke", "Function Room"], hours: { Mon: "11:00 \u2013 23:00", Tue: "11:00 \u2013 23:00", Wed: "11:00 \u2013 23:00", Thu: "11:00 \u2013 23:30", Fri: "11:00 \u2013 00:00", Sat: "11:00 \u2013 00:00", Sun: "11:00 \u2013 22:30" } },
+      "The Olde Swan": { displayName: "The Olde Swan", address: "Windsor Street, Chertsey KT16 8HD", bio: "Cosy Chertsey pub known for its quiz nights and curry club. Proper pints, properly poured.", website: "", photo: null, services: ["Dog Friendly", "Food Served", "Real Ales", "Darts", "Quiz Nights"], hours: { Mon: "15:00 \u2013 23:00", Tue: "12:00 \u2013 23:00", Wed: "12:00 \u2013 23:00", Thu: "12:00 \u2013 23:00", Fri: "12:00 \u2013 00:00", Sat: "12:00 \u2013 00:00", Sun: "12:00 \u2013 22:00" } },
+      "The Coach & Horses": { displayName: "The Coach & Horses", address: "Guildford Street, Chertsey KT16 8DQ", bio: "Chertsey's comedy and steak destination. Book early \u2014 the comedy nights always sell out.", website: "", photo: null, services: ["Food Served", "Live Music", "Wi-Fi", "Wheelchair Access", "Comedy Nights"], hours: { Mon: "12:00 \u2013 23:00", Tue: "12:00 \u2013 23:00", Wed: "12:00 \u2013 23:00", Thu: "12:00 \u2013 23:00", Fri: "12:00 \u2013 00:00", Sat: "12:00 \u2013 00:00", Sun: "12:00 \u2013 22:00" } },
+      "The Old Crown": { displayName: "The Old Crown", address: "Thames Street, Weybridge KT13 8DX", bio: "Weybridge sports pub with big screens, surround sound, and craft beer on rotation.", website: "", photo: null, services: ["Sports TV", "Beer Garden", "Dog Friendly", "Real Ales", "Pool Table", "Darts", "Live Sport"], hours: { Mon: "12:00 \u2013 23:00", Tue: "12:00 \u2013 23:00", Wed: "12:00 \u2013 23:00", Thu: "12:00 \u2013 23:00", Fri: "12:00 \u2013 00:00", Sat: "11:00 \u2013 00:00", Sun: "11:00 \u2013 22:30" } },
+      "The Minnow": { displayName: "The Minnow", address: "Walton Lane, Weybridge KT13 8JQ", bio: "Riverside gastropub in Weybridge. Acoustic evenings on the terrace, fish and chips every Friday.", website: "https://theminnow.co.uk", photo: null, services: ["Beer Garden", "Dog Friendly", "Food Served", "Real Ales", "Family Friendly", "Wheelchair Access", "Live Music", "Outdoor Seating"], hours: { Mon: "11:00 \u2013 23:00", Tue: "11:00 \u2013 23:00", Wed: "11:00 \u2013 23:00", Thu: "11:00 \u2013 23:00", Fri: "11:00 \u2013 00:00", Sat: "10:00 \u2013 00:00", Sun: "10:00 \u2013 22:30" } },
+      "The Jolly Farmer": { displayName: "The Jolly Farmer", address: "Princes Road, Weybridge KT13 8DJ", bio: "Family-friendly pub in Weybridge with a huge beer garden and bouncy castle on bank holidays.", website: "", photo: null, services: ["Beer Garden", "Food Served", "Family Friendly", "Car Park", "Sports TV", "Dog Friendly", "Live Sport", "Outdoor Seating"], hours: { Mon: "12:00 \u2013 22:00", Tue: "12:00 \u2013 22:00", Wed: "12:00 \u2013 22:00", Thu: "12:00 \u2013 23:00", Fri: "12:00 \u2013 23:00", Sat: "11:00 \u2013 23:00", Sun: "11:00 \u2013 21:00" } },
+      "The Queen's Head": { displayName: "The Queen's Head", address: "Bridge Road, Weybridge KT13 8AS", bio: "Lively Weybridge pub with Saturday karaoke, cocktail deals, and private booths for groups.", website: "", photo: null, services: ["Live Music", "Wi-Fi", "Food Served", "Karaoke", "Late Licence"], hours: { Mon: "14:00 \u2013 23:00", Tue: "14:00 \u2013 23:00", Wed: "14:00 \u2013 23:00", Thu: "14:00 \u2013 23:30", Fri: "14:00 \u2013 00:00", Sat: "12:00 \u2013 01:00", Sun: "12:00 \u2013 22:30" } },
+      "Demo Venue": { displayName: "", address: "", bio: "", website: "", photo: null, services: [], hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" } },
+    };
+
+    function getDistanceMiles(lat1, lng1, lat2, lng2) {
+      const R = 3958.8;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function formatDistance(miles) {
+      if (miles < 0.15) return "Right here";
+      if (miles < 1) return (miles * 1760).toFixed(0) + " yards";
+      return miles.toFixed(1) + " miles";
+    }
+
+    function getEventDistance(event, userLoc) {
+      if (!userLoc) return null;
+      const coords = VENUE_COORDS[event.venue];
+      if (!coords) return null;
+      return getDistanceMiles(userLoc.lat, userLoc.lng, coords.lat, coords.lng);
+    }
+
+    /* ── Keggo V2 icon system ── */
+    const CAT_SVG_MAP = {
+      music: "live-music", food: "food-drink", quiz: "quizzes", sports: "live-sport",
+      comedy: "comedy", karaoke: "karaoke", movie: "movie-night", games: "games-night",
+      roast: "sunday-roast", coffee: "coffee-morning", cocktails: "cocktails",
+      pool: "pool", darts: "darts", bingo: "bingo", dj: "dj-night", tasting: "tasting",
+      brunch: "brunch", outdoor: "outdoor", art: "art-craft", dogs: "dog-friendly",
+      bookclub: "book-club", charity: "charity", other: "other",
+    };
+
+    const SVG_BASE = "keggo-event-icons/Icons V2/svgs/";
+
+    /* Inline V2 SVG strings (used in data-URL placeholders + map markers) */
+    const CAT_SVG_INLINE = {
+      music: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="34" y="6" width="12" height="10" rx="1.5" fill="#F2E4C4"/><circle cx="32" cy="9" r="1.6" fill="#F4B944"/><circle cx="32" cy="13" r="1.6" fill="#F4B944"/><circle cx="48" cy="9" r="1.6" fill="#F4B944"/><circle cx="48" cy="13" r="1.6" fill="#F4B944"/><line x1="34" y1="16" x2="46" y2="16" stroke-width="2.4"/><rect x="36" y="16" width="8" height="22" fill="#F2E4C4"/><path d="M40 38 Q26 38 24 47 Q22 54 30 56 Q24 58 22 64 Q22 73 32 73 Q40 73 40 73 Q48 73 48 73 Q58 73 58 64 Q56 58 50 56 Q58 54 56 47 Q54 38 40 38 Z" fill="#F2E4C4"/><path d="M40 38 Q26 38 24 47 Q22 54 30 56 Q24 58 22 64 Q22 73 32 73 Q40 73 40 73 Q48 73 48 73 Q58 73 58 64 Q56 58 50 56 Q58 54 56 47 Q54 38 40 38 Z"/><circle cx="40" cy="60" r="6" fill="#D84A2A"/><circle cx="40" cy="60" r="6"/></svg>`,
+      food: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L16 26 Q16 30 20 30 L22 30 L22 68 L26 70 L30 68 L30 30 L32 30 Q36 30 36 26 L36 12" fill="#F2E4C4"/><line x1="20" y1="12" x2="20" y2="24"/><line x1="26" y1="12" x2="26" y2="24"/><line x1="32" y1="12" x2="32" y2="24"/><path d="M46 18 L66 18 L63 70 L49 70 Z" fill="#F2E4C4"/><path d="M46 26 Q50 22 54 26 Q58 22 62 26 Q64 24 66 26 L66 18 L46 18 Z" fill="#F4B944"/><line x1="46" y1="26" x2="66" y2="26"/></svg>`,
+      quiz: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 22 Q14 14 22 14 L60 14 Q68 14 68 22 L68 46 Q68 54 60 54 L36 54 L24 64 L26 54 Q14 54 14 46 Z" fill="#F2E4C4"/><path d="M35 26 Q35 21 41 21 Q47 21 47 26 Q47 30 43 32 Q41 33 41 36" stroke-width="2.6" fill="none"/><circle cx="41" cy="41" r="1.8" fill="#1A1715" stroke="none"/><circle cx="62" cy="20" r="3" fill="#D84A2A"/></svg>`,
+      sports: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="14" width="64" height="42" rx="5" fill="#F2E4C4"/><path d="M34 24 L52 35 L34 46 Z" fill="#F4B944"/><path d="M34 24 L52 35 L34 46 Z"/><circle cx="16" cy="22" r="2.4" fill="#D84A2A" stroke="none"/><path d="M30 56 L28 66 L52 66 L50 56"/><line x1="22" y1="66" x2="58" y2="66"/></svg>`,
+      comedy: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 22 Q22 14 32 14 L46 14 Q56 14 56 22 L54 44 Q52 56 38 56 Q24 56 22 44 Z" fill="#F4B944"/><path d="M22 22 Q22 14 32 14 L46 14 Q56 14 56 22 L54 44 Q52 56 38 56 Q24 56 22 44 Z"/><path d="M30 30 Q34 26 38 30" stroke-width="1.8"/><path d="M44 30 Q48 26 52 30" stroke-width="1.8"/><path d="M28 40 Q38 52 50 40"/><path d="M30 36 Q30 30 38 30 L52 30 Q62 30 62 38 L60 60 Q58 70 46 70 Q32 70 30 60 Z" fill="#F2E4C4"/><path d="M37 42 Q40 39 43 42" stroke-width="1.8"/><path d="M51 42 Q54 39 57 42" stroke-width="1.8"/><path d="M36 54 Q46 64 58 54"/><circle cx="68" cy="20" r="3" fill="#D84A2A"/></svg>`,
+      karaoke: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-22 30 42)"><ellipse cx="22" cy="22" rx="14" ry="15" fill="#F2E4C4"/><ellipse cx="22" cy="22" rx="14" ry="15"/><path d="M10 36 Q22 40 34 36" stroke-width="2.6" fill="none"/><path d="M14 38 L18 58 Q19 62 23 62 L25 62 Q29 62 30 58 L30 36" fill="#F2E4C4"/><path d="M14 38 L18 58 Q19 62 23 62 L25 62 Q29 62 30 58 L30 36"/><circle cx="22" cy="46" r="2.2" fill="#D84A2A"/></g><path d="M58 24 L58 44 Q54 44 54 48 Q54 52 58 52 Q62 52 62 48 L62 30 L70 28 L70 44 Q66 44 66 48 Q66 52 70 52 Q74 52 74 48 L74 24 Z" fill="#F4B944"/><path d="M58 24 L58 44 Q54 44 54 48 Q54 52 58 52 Q62 52 62 48 L62 30 L70 28 L70 44 Q66 44 66 48 Q66 52 70 52 Q74 52 74 48 L74 24 Z"/></svg>`,
+      movie: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-4 40 50)"><rect x="10" y="36" width="60" height="34" rx="3" fill="#F2E4C4"/><path d="M10 28 L70 18 L70 26 L10 36 Z" fill="#1A1715"/><path d="M22 33 L28 23" stroke="#F2E4C4" stroke-width="2.4"/><path d="M38 31 L44 21" stroke="#F2E4C4" stroke-width="2.4"/><path d="M54 28 L60 19" stroke="#F2E4C4" stroke-width="2.4"/><path d="M10 28 L70 18 L70 26 L10 36 Z"/><line x1="20" y1="50" x2="42" y2="50" stroke-width="1.6"/><line x1="20" y1="58" x2="36" y2="58" stroke-width="1.6"/><circle cx="56" cy="56" r="7" fill="#D84A2A"/></g></svg>`,
+      games: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-12 26 30)"><rect x="12" y="14" width="26" height="36" rx="3" fill="#F2E4C4"/><path d="M25 36 Q19 28 22 24 Q26 22 25 26 Q24 22 28 24 Q31 28 25 36 Z" fill="#D84A2A"/></g><g transform="rotate(8 52 36)"><rect x="40" y="18" width="26" height="36" rx="3" fill="#F2E4C4"/></g><g transform="rotate(-6 24 60)"><rect x="12" y="50" width="22" height="22" rx="3" fill="#F4B944"/><rect x="12" y="50" width="22" height="22" rx="3"/><circle cx="18" cy="56" r="1.8" fill="#1A1715" stroke="none"/><circle cx="28" cy="56" r="1.8" fill="#1A1715" stroke="none"/><circle cx="23" cy="61" r="1.8" fill="#1A1715" stroke="none"/><circle cx="18" cy="66" r="1.8" fill="#1A1715" stroke="none"/><circle cx="28" cy="66" r="1.8" fill="#1A1715" stroke="none"/></g></svg>`,
+      roast: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="40" cy="60" rx="32" ry="6" fill="#F2E4C4"/><path d="M12 60 Q12 28 40 28 Q68 28 68 60" fill="#F2E4C4"/><line x1="40" y1="28" x2="40" y2="20"/><circle cx="40" cy="16" r="3.5" fill="#D84A2A"/></svg>`,
+      coffee: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 18 Q24 22 28 26 Q32 30 28 34" stroke-width="1.8"/><path d="M40 14 Q36 18 40 22 Q44 26 40 30" stroke-width="1.8"/><path d="M52 18 Q48 22 52 26 Q56 30 52 34" stroke-width="1.8"/><path d="M14 38 L14 64 Q14 70 22 70 L52 70 Q60 70 60 64 L60 38 Z" fill="#F2E4C4"/><line x1="12" y1="38" x2="62" y2="38"/><path d="M60 44 Q72 44 72 54 Q72 64 60 64"/><path d="M37 56 Q32 50 35 47 Q38 46 37 49 Q36 46 40 47 Q43 50 37 56 Z" fill="#D84A2A"/></svg>`,
+      cocktails: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18 L66 18 L40 48 Z" fill="#F2E4C4"/><path d="M22 24 L40 42 L58 24" stroke-width="1.6"/><line x1="40" y1="48" x2="40" y2="66"/><line x1="26" y1="66" x2="54" y2="66"/><line x1="48" y1="28" x2="62" y2="14" stroke-width="1.4"/><circle cx="48" cy="28" r="3.5" fill="#D84A2A"/><circle cx="48" cy="28" r="3.5"/><circle cx="44" cy="32" r="2.2" fill="#F4B944"/></svg>`,
+      pool: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="68" y1="14" x2="34" y2="48" stroke-width="3.4"/><line x1="68" y1="14" x2="74" y2="8" stroke-width="3.4" stroke="#F4B944"/><line x1="68" y1="14" x2="74" y2="8" stroke-width="3.4"/><circle cx="48" cy="58" r="13" fill="#1A1715"/><circle cx="48" cy="58" r="13"/><circle cx="48" cy="58" r="6" fill="#F2E4C4"/></svg>`,
+      darts: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="40" r="28" fill="#F2E4C4"/><path d="M40 12 L40 40 L62 26 Z" fill="#1A1715"/><path d="M40 40 L62 26 L68 40 Z" fill="#F4B944"/><path d="M40 40 L68 40 L62 54 Z" fill="#1A1715"/><path d="M40 40 L62 54 L40 68 Z" fill="#F4B944"/><path d="M40 40 L40 68 L18 54 Z" fill="#1A1715"/><path d="M40 40 L18 54 L12 40 Z" fill="#F4B944"/><path d="M40 40 L12 40 L18 26 Z" fill="#1A1715"/><path d="M40 40 L18 26 L40 12 Z" fill="#F4B944"/><circle cx="40" cy="40" r="28"/><circle cx="40" cy="40" r="16" fill="#F2E4C4"/><circle cx="40" cy="40" r="6" fill="#D84A2A"/><line x1="40" y1="40" x2="62" y2="18" stroke-width="2.6"/></svg>`,
+      bingo: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-3 40 40)"><rect x="10" y="20" width="60" height="40" rx="3" fill="#F2E4C4"/><rect x="10" y="20" width="60" height="8" fill="#D84A2A"/><rect x="10" y="20" width="60" height="40" rx="3"/><circle cx="28" cy="43" r="3.5" fill="#F4B944"/><circle cx="40" cy="53" r="3.5" fill="#F4B944"/></g></svg>`,
+      dj: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="20" width="58" height="48" rx="4" fill="#F2E4C4"/><circle cx="30" cy="44" r="18" fill="#1A1715"/><circle cx="30" cy="44" r="18"/><circle cx="30" cy="44" r="6" fill="#D84A2A"/><circle cx="30" cy="44" r="6"/><circle cx="30" cy="44" r="1.5" fill="#1A1715" stroke="none"/><circle cx="58" cy="26" r="3" fill="#F4B944"/><line x1="58" y1="26" x2="42" y2="40" stroke-width="2.6"/></svg>`,
+      tasting: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12 L58 12 Q58 36 40 44 Q22 36 22 12 Z" fill="#F2E4C4"/><path d="M24 18 Q40 32 56 18 L56 12 L24 12 Z" fill="#D84A2A"/><path d="M24 18 Q40 32 56 18 L56 12 L24 12 Z"/><line x1="40" y1="44" x2="40" y2="66"/><line x1="28" y1="68" x2="52" y2="68"/></svg>`,
+      brunch: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 42 Q12 26 28 26 Q44 24 52 32 Q56 38 50 42 Q42 42 38 40 Q30 48 20 48 Q12 48 10 42 Z" fill="#F2E4C4"/><circle cx="22" cy="38" r="6" fill="#F4B944"/><circle cx="22" cy="38" r="6"/><path d="M44 50 L66 50 L64 68 Q64 70 62 70 L48 70 Q46 70 46 68 Z" fill="#F2E4C4"/></svg>`,
+      outdoor: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 36 Q12 16 40 14 Q68 16 72 36 Z" fill="#F2E4C4"/><path d="M8 36 Q14 22 26 18 L26 36 Z" fill="#D84A2A"/><path d="M40 14 L40 36 L54 36 Q60 22 54 16 Z" fill="#D84A2A"/><path d="M8 36 Q12 16 40 14 Q68 16 72 36 Z"/><line x1="40" y1="36" x2="40" y2="68"/><line x1="28" y1="68" x2="52" y2="68"/></svg>`,
+      art: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 38 Q12 18 36 16 Q60 14 64 32 Q66 44 56 46 Q50 46 50 52 Q50 62 40 62 Q12 60 12 38 Z" fill="#F2E4C4"/><circle cx="32" cy="26" r="3.5" fill="#D84A2A"/><circle cx="46" cy="24" r="3.5" fill="#F4B944"/><circle cx="54" cy="36" r="3.5" fill="#2A4A35"/></svg>`,
+      dogs: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 26 Q12 38 18 44 Q22 40 22 32 Q22 24 18 22 Q14 22 14 26 Z" fill="#F2E4C4"/><path d="M66 26 Q68 38 62 44 Q58 40 58 32 Q58 24 62 22 Q66 22 66 26 Z" fill="#F2E4C4"/><path d="M18 40 Q18 24 40 24 Q62 24 62 40 Q62 60 40 62 Q18 60 18 40 Z" fill="#F2E4C4"/><circle cx="30" cy="38" r="2.4" fill="#1A1715" stroke="none"/><circle cx="50" cy="38" r="2.4" fill="#1A1715" stroke="none"/><path d="M38 56 Q40 60 42 56" fill="#D84A2A" stroke="#1A1715" stroke-width="1.4"/></svg>`,
+      bookclub: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22 Q20 18 32 22 L32 50 Q20 46 8 50 Z" fill="#F2E4C4"/><path d="M32 22 Q44 18 56 22 L56 50 Q44 46 32 50 Z" fill="#F2E4C4"/><line x1="32" y1="22" x2="32" y2="50"/><path d="M44 22 L48 22 L48 36 L46 32 L44 36 Z" fill="#D84A2A"/><path d="M44 22 L48 22 L48 36 L46 32 L44 36 Z"/></svg>`,
+      charity: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 56 Q14 70 28 70 L52 70 Q66 70 66 56 L66 50 Q60 50 56 54 Q52 50 40 50 Q28 50 24 54 Q20 50 14 50 Z" fill="#F2E4C4"/><path d="M40 42 Q30 28 22 34 Q16 42 40 56 Q64 42 58 34 Q50 28 40 42 Z" fill="#D84A2A"/><path d="M40 42 Q30 28 22 34 Q16 42 40 56 Q64 42 58 34 Q50 28 40 42 Z"/></svg>`,
+      other: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 26 Q10 16 22 16 L58 16 Q70 16 70 28 L70 44 Q70 54 58 54 L34 54 L22 64 L24 54 Q10 52 10 42 Z" fill="#F2E4C4"/><circle cx="26" cy="36" r="3" fill="#1A1715" stroke="none"/><circle cx="40" cy="36" r="3" fill="#D84A2A" stroke="none"/><circle cx="54" cy="36" r="3" fill="#1A1715" stroke="none"/></svg>`,
+      football: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="40" r="26" fill="#F2E4C4"/><polygon points="40,28 51,35.5 47,47.5 33,47.5 29,35.5" fill="#1A1715"/><line x1="40" y1="28" x2="40" y2="16"/><line x1="51" y1="35.5" x2="62" y2="32"/><line x1="47" y1="47.5" x2="55" y2="60"/><line x1="33" y1="47.5" x2="25" y2="60"/><line x1="29" y1="35.5" x2="18" y2="32"/></svg>`,
+      rugby: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="40" cy="40" rx="28" ry="15" transform="rotate(-22 40 40)" fill="#F2E4C4"/><ellipse cx="40" cy="40" rx="28" ry="15" transform="rotate(-22 40 40)"/><line x1="22" y1="48" x2="58" y2="32" stroke-width="1.6"/><line x1="22" y1="48" x2="20" y2="52" stroke="#D84A2A" stroke-width="2"/><line x1="58" y1="32" x2="60" y2="28" stroke="#D84A2A" stroke-width="2"/></svg>`,
+      boxing: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-18 26 44)"><path d="M14 32 Q14 20 28 20 Q40 20 40 30 L40 46 Q40 54 32 54 L20 54 Q14 54 14 46 Z" fill="#F2E4C4"/><rect x="18" y="50" width="20" height="6" fill="#D84A2A"/><rect x="18" y="50" width="20" height="6"/></g><g transform="rotate(18 54 44)"><path d="M40 32 Q40 20 54 20 Q66 20 66 30 L66 46 Q66 54 60 54 L46 54 Q40 54 40 46 Z" fill="#F2E4C4"/><rect x="42" y="50" width="20" height="6" fill="#F4B944"/><rect x="42" y="50" width="20" height="6"/></g></svg>`,
+      "horse-racing": `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 18 Q18 12 24 12 Q30 12 30 18 L30 54 Q30 66 40 66 Q50 66 50 54 L50 18 Q50 12 56 12 Q62 12 62 18 L62 56 Q62 70 40 70 Q18 70 18 56 Z" fill="#F2E4C4"/><circle cx="40" cy="14" r="3" fill="#D84A2A"/></svg>`,
+      f1: `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 80 80" fill="none" stroke="#1A1715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 50 L18 44 L30 42 L36 36 L48 34 Q54 34 56 38 L60 42 L72 42 L74 48 L72 54 L8 54 Z" fill="#F2E4C4"/><path d="M40 33 L48 33" stroke-width="2" stroke="#D84A2A"/><circle cx="22" cy="56" r="7" fill="#1A1715"/><circle cx="22" cy="56" r="3" fill="#F4B944"/><circle cx="62" cy="56" r="7" fill="#1A1715"/><circle cx="62" cy="56" r="3" fill="#F4B944"/></svg>`,
+    };
+
+    const SVGEmptySaveIcon = () => (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+      </svg>
+    );
+
+    /* ── Main headliner categories (shown by default) ── */
+    const MAIN_CATEGORIES = [
+      { id: "music",     label: "Live Music",     svgFile: "live-music" },
+      { id: "quiz",      label: "Quizzes",        svgFile: "quizzes" },
+      { id: "sports",    label: "Live Sport",     svgFile: "live-sport" },
+      { id: "food",      label: "Food & Drink",   svgFile: "food-drink" },
+      { id: "comedy",    label: "Comedy",         svgFile: "comedy" },
+      { id: "movie",     label: "Movie Night",    svgFile: "movie-night" },
+      { id: "karaoke",   label: "Karaoke",        svgFile: "karaoke" },
+      { id: "games",     label: "Games Night",    svgFile: "games-night" },
+      { id: "roast",     label: "Sunday Roast",   svgFile: "sunday-roast" },
+      { id: "coffee",    label: "Coffee Morning", svgFile: "coffee-morning" },
+      { id: "cocktails", label: "Cocktails",      svgFile: "cocktails" },
+      { id: "other",     label: "Other",          svgFile: "other" },
+    ];
+
+    /* ── Secondary "Also Happening" categories (shown behind More) ── */
+    const SECONDARY_CATEGORIES = [
+      { id: "bingo",    label: "Bingo",        svgFile: "bingo" },
+      { id: "dj",       label: "DJ Night",     svgFile: "dj-night" },
+      { id: "art",      label: "Art & Craft",  svgFile: "art-craft" },
+      { id: "bookclub", label: "Book Club",    svgFile: "book-club" },
+      { id: "brunch",   label: "Brunch",       svgFile: "brunch" },
+      { id: "tasting",  label: "Tasting",      svgFile: "tasting" },
+      { id: "charity",  label: "Charity",      svgFile: "charity" },
+      { id: "outdoor",  label: "Outdoor",      svgFile: "outdoor" },
+      { id: "dogs",     label: "Dog Friendly", svgFile: "dog-friendly" },
+      { id: "pool",     label: "Pool",         svgFile: "pool" },
+      { id: "darts",    label: "Darts",        svgFile: "darts" },
+    ];
+
+    const CATEGORIES = [...MAIN_CATEGORIES, ...SECONDARY_CATEGORIES]; // kept for card labels
+
+    /* ── Sport sub-type filter (shown when Live Sport is active) ── */
+    const SPORT_SUBTYPES = [
+      { id: "football",     label: "Football",     svgFile: "football" },
+      { id: "rugby",        label: "Rugby",        svgFile: "rugby" },
+      { id: "boxing",       label: "Boxing",       svgFile: "boxing" },
+      { id: "f1",           label: "Formula 1",    svgFile: "formula-1" },
+      { id: "horse-racing", label: "Horse Racing", svgFile: "horse-racing" },
+      { id: "darts",        label: "Darts",        svgFile: "darts" },
+      { id: "pool",         label: "Pool",         svgFile: "pool" },
+      { id: "other-sport",  label: "Other Sport",  svgFile: "other" },
+    ];
+
+    const SPORT_TYPES = SPORT_SUBTYPES; // kept for card sport-type labels
+
+    const DEMO_ACCOUNTS = [
+      { email: "thepelican@demo.com", password: "demo", name: "The Pelican", area: "Addlestone", type: "venue" },
+      { email: "crownhotel@demo.com", password: "demo", name: "The Crown Hotel", area: "Chertsey", type: "venue" },
+      { email: "theminnow@demo.com", password: "demo", name: "The Minnow", area: "Weybridge", type: "venue" },
+      { email: "demo@demo.com", password: "demo", name: "Demo Venue", area: "Addlestone", type: "venue" },
+      { email: "user@demo.com", password: "demo", name: "Taylor", type: "user" },
+      { email: "sarah@demo.com", password: "demo", name: "Sarah", type: "user" },
+    ];
+
+    const VENUE_COORDS = {
+      "The Pelican": { lat: 51.369248, lng: -0.475258 },   // 9 Hamm Moor Lane, KT15 2SB
+      "The White Hart": { lat: 51.358825, lng: -0.487176 }, // New Haw Road, KT15 2DS
+      "The Cricketers": { lat: 51.358898, lng: -0.513752 }, // 32 Rowtown, KT15 1EY
+      "The Crown Hotel": { lat: 51.392116, lng: -0.502990 }, // 7 London Street, KT16 8AP
+      "The Olde Swan": { lat: 51.39232, lng: -0.504403 },   // 27 Windsor Street, KT16 8AY
+      "The Coach & Horses": { lat: 51.394470, lng: -0.506604 }, // 14 St Ann's Road, KT16 9DG
+      "The Old Crown": { lat: 51.37889, lng: -0.455524 },   // 83 Thames Street, KT13 8LP
+      "The Minnow": { lat: 51.37885, lng: -0.454550 },      // 104 Thames Street, KT13 8NG
+      "The Jolly Farmer": { lat: 51.368073, lng: -0.448724 }, // 41 Princes Road, KT13 9BN
+      "The Queen's Head": { lat: 51.370870, lng: -0.463150 }, // 1 Bridge Road, KT13 8XS
+    };
+
+    const CAT_STYLES = {
+      music:     { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      food:      { bg: "#F4B944", text: "#1A1715", icon: "#1A1715" },
+      quiz:      { bg: "#2A4A35", text: "#F2E4C4", icon: "#2A4A35" },
+      sports:    { bg: "#2A4A35", text: "#F2E4C4", icon: "#2A4A35" },
+      comedy:    { bg: "#1A1715", text: "#F2E4C4", icon: "#1A1715" },
+      karaoke:   { bg: "#1A1715", text: "#F4B944", icon: "#1A1715" },
+      movie:     { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      games:     { bg: "#F4B944", text: "#1A1715", icon: "#1A1715" },
+      roast:     { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      coffee:    { bg: "#F4B944", text: "#1A1715", icon: "#1A1715" },
+      cocktails: { bg: "#1A1715", text: "#F2E4C4", icon: "#1A1715" },
+      pool:      { bg: "#2A4A35", text: "#F2E4C4", icon: "#2A4A35" },
+      darts:     { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      bingo:     { bg: "#F4B944", text: "#1A1715", icon: "#1A1715" },
+      dj:        { bg: "#1A1715", text: "#F4B944", icon: "#1A1715" },
+      tasting:   { bg: "#2A4A35", text: "#F2E4C4", icon: "#2A4A35" },
+      brunch:    { bg: "#F4B944", text: "#1A1715", icon: "#1A1715" },
+      outdoor:   { bg: "#2A4A35", text: "#F2E4C4", icon: "#2A4A35" },
+      art:       { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      dogs:      { bg: "#1A1715", text: "#F2E4C4", icon: "#1A1715" },
+      bookclub:  { bg: "#1A1715", text: "#F4B944", icon: "#1A1715" },
+      charity:   { bg: "#D84A2A", text: "#F2E4C4", icon: "#D84A2A" },
+      other:     { bg: "#F2E4C4", text: "#1A1715", icon: "#1A1715" },
+    };
+
+    function getIconHTML(category) {
+      return getIconHTMLColoured(category);
+    }
+
+    function getIconHTMLColoured(category) {
+      const svgContent = CAT_SVG_INLINE[category] || CAT_SVG_INLINE.other;
+      return svgContent;
+    }
+
+    /* Brand placeholder — cream bg with V2 icon when no photo */
+    function createSVGPlaceholder(category) {
+      const iconSvg = (CAT_SVG_INLINE[category] || CAT_SVG_INLINE.other).replace(/opacity="[^"]*"/g, '').replace(/<svg /, '<svg opacity="0.45" ');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="600" height="340" fill="#F2E4C4"/><g transform="translate(266, 102)">${iconSvg}</g><text x="300" y="264" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="16" font-weight="600" fill="#968e7f">No photo yet</text><text x="300" y="312" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="22" font-weight="700" fill="#1A1715" opacity="0.15">Keggo<tspan fill="#D84A2A">.</tspan></text></svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
+
+    const POSTER_PLACEHOLDERS = {
+      music: createSVGPlaceholder("music"),
+      food: createSVGPlaceholder("food"),
+      quiz: createSVGPlaceholder("quiz"),
+      sports: createSVGPlaceholder("sports"),
+      comedy: createSVGPlaceholder("comedy"),
+      karaoke: createSVGPlaceholder("karaoke"),
+      movie: createSVGPlaceholder("movie"),
+      games: createSVGPlaceholder("games"),
+      roast: createSVGPlaceholder("roast"),
+      coffee: createSVGPlaceholder("coffee"),
+      cocktails: createSVGPlaceholder("cocktails"),
+      pool: createSVGPlaceholder("pool"),
+      darts: createSVGPlaceholder("darts"),
+      bingo: createSVGPlaceholder("bingo"),
+      dj: createSVGPlaceholder("dj"),
+      tasting: createSVGPlaceholder("tasting"),
+      brunch: createSVGPlaceholder("brunch"),
+      outdoor: createSVGPlaceholder("outdoor"),
+      art: createSVGPlaceholder("art"),
+      dogs: createSVGPlaceholder("dogs"),
+      bookclub: createSVGPlaceholder("bookclub"),
+      charity: createSVGPlaceholder("charity"),
+      other: createSVGPlaceholder("other"),
+    };
+
+    function genDate(d) { const dt = new Date(); dt.setDate(dt.getDate() + d); return dt.toISOString().split("T")[0]; }
+    function formatDate(s) {
+      const d = new Date(s + "T00:00:00");
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      return { day: d.getDate(), month: months[d.getMonth()], weekday: days[d.getDay()] };
+    }
+    function formatDateLong(s) {
+      const d = new Date(s + "T00:00:00");
+      return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    }
+
+    const INITIAL_EVENTS = [
+      { id: 1, title: "Thursday Quiz Night", venue: "The Pelican", area: "Addlestone", category: "quiz", date: genDate(4), time: "19:30", price: "Free", description: "Weekly pub quiz with prizes. Teams of up to 6. Jackpot round included. Arrive early to grab a table!", createdBy: "thepelican@demo.com", poster: "Demo Site Images/Events Images/pub quiz.png", location: "26 Church Street, Addlestone KT15 1EL", sportType: null },
+      { id: 2, title: "Pizza & Pint Fridays", venue: "The Pelican", area: "Addlestone", category: "food", date: genDate(5), time: "17:00", price: "\u00a38.50", description: "Any stone-baked pizza plus a pint of your choice for just \u00a38.50. Available every Friday from 5pm.", createdBy: "thepelican@demo.com", poster: "Demo Site Images/Events Images/Food and Drink.png", location: "26 Church Street, Addlestone KT15 1EL", sportType: null },
+      { id: 3, title: "Open Mic Night", venue: "The White Hart", area: "Addlestone", category: "music", date: genDate(6), time: "20:00", price: "Free", description: "Bring your guitar, your voice, or just your ears. All welcome. Sign up at the bar from 7pm.", createdBy: "thepelican@demo.com", poster: "Demo Site Images/Events Images/live music.png", location: "43 High Street, Addlestone KT15 1HQ", sportType: null },
+      { id: 4, title: "Sunday Roast & Live Jazz", venue: "The Cricketers", area: "Addlestone", category: "music", date: genDate(8), time: "12:00", price: "\u00a313.95", description: "Enjoy a proper Sunday roast with live jazz from the Surrey Swing Quartet. Booking recommended.", createdBy: "thepelican@demo.com", poster: null, location: "Cricketers Lane, Addlestone KT15 1ST", sportType: null },
+      { id: 5, title: "Karaoke Saturdays", venue: "The Crown Hotel", area: "Chertsey", category: "karaoke", date: genDate(7), time: "21:00", price: "Free", description: "Belt out your favourites every Saturday night. Song requests from 9pm. Drink deals all evening.", createdBy: "crownhotel@demo.com", poster: null, location: "The Crown, Chertsey KT16 8AB", sportType: null },
+      { id: 6, title: "Friday Night Live: The Wildflowers", venue: "The Crown Hotel", area: "Chertsey", category: "music", date: genDate(5), time: "20:30", price: "\u00a35", description: "Local indie-folk band The Wildflowers play a full set of originals and covers. Doors at 8pm.", createdBy: "crownhotel@demo.com", poster: "Demo Site Images/Events Images/live music 2.png", location: "The Crown, Chertsey KT16 8AB", sportType: null },
+      { id: 7, title: "Burger & Quiz Tuesday", venue: "The Olde Swan", area: "Chertsey", category: "quiz", date: genDate(2), time: "19:00", price: "\u00a36.50", description: "Gourmet burger deal plus our infamous quiz. Book your table for guaranteed seats. Cash prize for winners!", createdBy: "crownhotel@demo.com", poster: null, location: "Olde Swan, Chertsey KT16 8HD", sportType: null },
+      { id: 8, title: "Comedy Night", venue: "The Coach & Horses", area: "Chertsey", category: "comedy", date: genDate(12), time: "20:00", price: "\u00a310", description: "Three professional comedians from the London circuit. Advance tickets recommended \u2014 always sells out.", createdBy: "crownhotel@demo.com", poster: null, location: "Coach & Horses, Chertsey KT16 8DQ", sportType: null },
+      { id: 9, title: "Steak Night Wednesday", venue: "The Coach & Horses", area: "Chertsey", category: "food", date: genDate(3), time: "18:00", price: "\u00a312.95", description: "8oz ribeye with chips, salad and a glass of house wine. Every Wednesday evening.", createdBy: "crownhotel@demo.com", poster: null, location: "Coach & Horses, Chertsey KT16 8DQ", sportType: null },
+      { id: 10, title: "Premier League Big Screen", venue: "The Old Crown", area: "Weybridge", category: "sports", date: genDate(6), time: "15:00", price: "Free", description: "All Premier League matches shown on our big screens with surround sound. Matchday food and drink offers.", createdBy: "theminnow@demo.com", poster: "Demo Site Images/Events Images/Live football.png", location: "Old Crown, Weybridge KT13 8DX", sportType: "football" },
+      { id: 11, title: "Acoustic Evening", venue: "The Minnow", area: "Weybridge", category: "music", date: genDate(5), time: "19:30", price: "Free", description: "Intimate acoustic sets from local singer-songwriters. Relaxed riverside vibes with craft ales on tap.", createdBy: "theminnow@demo.com", poster: null, location: "The Minnow, Weybridge KT13 8JQ", sportType: null },
+      { id: 12, title: "Fish & Chip Friday", venue: "The Minnow", area: "Weybridge", category: "food", date: genDate(5), time: "12:00", price: "\u00a39.95", description: "Beer-battered cod with hand-cut chips and mushy peas. Our most popular dish \u2014 available all day Friday.", createdBy: "theminnow@demo.com", poster: null, location: "The Minnow, Weybridge KT13 8JQ", sportType: null },
+      { id: 13, title: "Family Quiz Sunday", venue: "The Jolly Farmer", area: "Weybridge", category: "quiz", date: genDate(8), time: "16:00", price: "\u00a32pp", description: "Family-friendly quiz with rounds for all ages. Kids welcome. Bouncy castle in the beer garden (weather permitting).", createdBy: "theminnow@demo.com", poster: null, location: "Jolly Farmer, Weybridge KT13 8DJ", sportType: null },
+      { id: 14, title: "Karaoke & Cocktails", venue: "The Queen's Head", area: "Weybridge", category: "karaoke", date: genDate(7), time: "20:30", price: "Free", description: "Saturday night karaoke with 2-for-1 cocktails until 10pm. Private booth available for groups of 8+.", createdBy: "theminnow@demo.com", poster: null, location: "Queen's Head, Weybridge KT13 8AS", sportType: null },
+      { id: 15, title: "Bank Holiday BBQ & Live Band", venue: "The Jolly Farmer", area: "Weybridge", category: "music", date: genDate(15), time: "13:00", price: "\u00a36", description: "Beer garden BBQ with live music from The Rolling Tones. Bouncy castle, face painting and more for the kids.", createdBy: "theminnow@demo.com", poster: null, location: "Jolly Farmer, Weybridge KT13 8DJ", sportType: null },
+      { id: 16, title: "Vinyl Night", venue: "The Old Crown", area: "Weybridge", category: "music", date: genDate(10), time: "19:00", price: "Free", description: "Bring your favourite records and we'll spin them. From Northern Soul to 90s dance. Craft beer specials all evening.", createdBy: "theminnow@demo.com", poster: null, location: "Old Crown, Weybridge KT13 8DX", sportType: null },
+      { id: 17, title: "Curry Club Thursday", venue: "The Olde Swan", area: "Chertsey", category: "food", date: genDate(4), time: "18:00", price: "\u00a39.50", description: "Authentic curry with rice, naan, and a pint. Choose from chicken tikka masala, lamb rogan josh or veggie balti.", createdBy: "crownhotel@demo.com", poster: null, location: "Olde Swan, Chertsey KT16 8HD", sportType: null },
+      { id: 18, title: "Stand-Up Sundays", venue: "The White Hart", area: "Addlestone", category: "comedy", date: genDate(8), time: "19:30", price: "\u00a37", description: "New comedy night launching this month. Three comics plus an MC. BYOB (Bring Your Own Banter).", createdBy: "thepelican@demo.com", poster: null, location: "43 High Street, Addlestone KT15 1HQ", sportType: null },
+      { id: 19, title: "Pool Tournament", venue: "The Old Crown", area: "Weybridge", category: "pool", date: genDate(3), time: "19:00", price: "\u00a35", description: "Weekly 8-ball pool tournament. Sign up at the bar from 6pm. Winner takes the pot. All skill levels welcome.", createdBy: "theminnow@demo.com", poster: null, location: "Old Crown, Weybridge KT13 8DX", sportType: null },
+      { id: 20, title: "Darts League Night", venue: "The Olde Swan", area: "Chertsey", category: "darts", date: genDate(2), time: "20:00", price: "Free", description: "Weekly darts league \u2014 teams of 3. League table running all season. New teams can join at the start of each month.", createdBy: "crownhotel@demo.com", poster: null, location: "Olde Swan, Chertsey KT16 8HD", sportType: null },
+      { id: 21, title: "Friday Night Pool", venue: "The White Hart", area: "Addlestone", category: "pool", date: genDate(5), time: "19:30", price: "Free", description: "Casual pool night \u2014 first come first served on our two tables. Background music and drink deals.", createdBy: "thepelican@demo.com", poster: null, location: "43 High Street, Addlestone KT15 1HQ", sportType: null },
+      { id: 22, title: "Six Nations Live", venue: "The Jolly Farmer", area: "Weybridge", category: "sports", date: genDate(9), time: "14:00", price: "Free", description: "Watch the Six Nations on the big screen. Matchday pies and pints deal. Book your table early.", createdBy: "theminnow@demo.com", poster: "Demo Site Images/Events Images/england football.png", location: "Jolly Farmer, Weybridge KT13 8DJ", sportType: "rugby" },
+      { id: 23, title: "Grand National Screening", venue: "The Old Crown", area: "Weybridge", category: "sports", date: genDate(11), time: "13:00", price: "Free", description: "The biggest race of the year on the big screen. Sweepstake entry at the bar. Prosecco and pint deals.", createdBy: "theminnow@demo.com", poster: "Demo Site Images/Events Images/live sport.png", location: "Old Crown, Weybridge KT13 8DX", sportType: "horse-racing" },
+      { id: 24, title: "Pub Movie Night: Jaws", venue: "The Minnow", area: "Weybridge", category: "movie", date: genDate(6), time: "20:00", price: "Free", description: "Classic film on the big screen. Popcorn and hot dogs available. Bring a blanket for the terrace.", createdBy: "theminnow@demo.com", poster: null, location: "The Minnow, Weybridge KT13 8JQ", sportType: null },
+      { id: 25, title: "Sunday Roast Special", venue: "The Cricketers", area: "Addlestone", category: "roast", date: genDate(8), time: "12:00", price: "\u00a314.95", description: "Choose from beef, chicken, or nut roast with all the trimmings. Booking essential \u2014 always sells out.", createdBy: "thepelican@demo.com", poster: null, location: "Cricketers Lane, Addlestone KT15 1ST", sportType: null },
+      { id: 26, title: "Saturday Night DJ", venue: "The Queen's Head", area: "Weybridge", category: "dj", date: genDate(7), time: "21:00", price: "Free", description: "DJ Kev spinning 90s classics and current chart bangers. Dancefloor open from 9pm. 2-for-1 cocktails until 10.", createdBy: "theminnow@demo.com", poster: null, location: "Queen's Head, Weybridge KT13 8AS", sportType: null },
+      { id: 27, title: "Gin & Whisky Tasting", venue: "The Minnow", area: "Weybridge", category: "tasting", date: genDate(14), time: "19:00", price: "\u00a325", description: "Guided tasting of 6 premium gins and 4 single malts. Includes cheese board and tasting notes to take home.", createdBy: "theminnow@demo.com", poster: "Demo Site Images/Events Images/Tasting.png", location: "The Minnow, Weybridge KT13 8JQ", sportType: null },
+      { id: 28, title: "Bottomless Brunch", venue: "The Crown Hotel", area: "Chertsey", category: "brunch", date: genDate(8), time: "11:00", price: "\u00a330pp", description: "90 minutes of unlimited prosecco, mimosas and bellinis. Full brunch menu included. Book in advance.", createdBy: "crownhotel@demo.com", poster: null, location: "The Crown, Chertsey KT16 8AB", sportType: null },
+      { id: 29, title: "Eyes Down Bingo", venue: "The Olde Swan", area: "Chertsey", category: "bingo", date: genDate(3), time: "19:30", price: "\u00a33", description: "Traditional bingo with a twist \u2014 cash prizes plus a jackpot rollover. Dabbers provided. Bar snacks available.", createdBy: "crownhotel@demo.com", poster: null, location: "Olde Swan, Chertsey KT16 8HD", sportType: null },
+      { id: 30, title: "Paint & Sip Night", venue: "The Coach & Horses", area: "Chertsey", category: "art", date: genDate(10), time: "19:00", price: "\u00a320", description: "Step-by-step painting class with a glass of wine included. No experience needed \u2014 just bring your mates.", createdBy: "crownhotel@demo.com", poster: null, location: "Coach & Horses, Chertsey KT16 8DQ", sportType: null },
+      { id: 31, title: "Dog Walk & Pint", venue: "The Jolly Farmer", area: "Weybridge", category: "dogs", date: genDate(8), time: "10:00", price: "Free", description: "Group dog walk from the pub, followed by a pint in the beer garden. Treats for the pups on the house.", createdBy: "theminnow@demo.com", poster: null, location: "Jolly Farmer, Weybridge KT13 8DJ", sportType: null },
+    ];
+
+    /* --- Reusable card icon badge using V2 SVGs --- */
+    function CardIconBadge({ category }) {
+      const svgFile = CAT_SVG_MAP[category] || "other";
+      return (
+        <div className="card-icon-badge">
+          <img src={`${SVG_BASE}${svgFile}.svg`} width="24" height="24" alt="" />
+        </div>
+      );
+    }
+
+    function getPosterImage(event, profiles) {
+      if (event.poster) return event.poster;
+      const venueImg = getVenueImage(event.venue, profiles);
+      if (venueImg) return venueImg;
+      return POSTER_PLACEHOLDERS[event.category];
+    }
+
+    /* --- Google Maps marker SVG helper --- */
+    function createMapMarkerSVG(category) {
+      const iconSvg = (CAT_SVG_INLINE[category] || CAT_SVG_INLINE.other)
+        .replace(/width="68"/, 'width="20"')
+        .replace(/height="68"/, 'height="20"');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+        <rect x="2" y="2" width="44" height="44" rx="12" fill="#F2E4C4" stroke="#1A1715" stroke-width="3"/>
+        <g transform="translate(14, 14)">${iconSvg}</g>
+      </svg>`;
+      return 'data:image/svg+xml,' + encodeURIComponent(svg);
+    }
+
+    /* --- Google Maps custom map style --- */
+    const GMAP_STYLES = [
+      { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
+      { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#c9e2f5" }] },
+      { featureType: "landscape.natural", elementType: "geometry.fill", stylers: [{ color: "#e8e0d0" }] },
+      { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#ffffff" }] },
+      { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#d9d0bb" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#605a51" }] },
+    ];
+
+    /* --- Venue Profile Modal (read-only for users) --- */
+    function VenueProfileModal({ venueName, venueArea, profiles, onClose }) {
+      const profile = profiles[venueName] || { displayName: "", address: "", bio: "", website: "", photo: null, services: [], hours: {} };
+      const venueImg = getVenueImage(venueName, profiles);
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="detail-modal" style={{ maxWidth: "560px" }} onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>&times;</button>
+            <div className="profile-card" style={{ border: "none", boxShadow: "none" }}>
+              {venueImg ? (
+                <img src={venueImg} alt={venueName} className="profile-hero" />
+              ) : (
+                <div className="profile-hero" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "32px", fontWeight: 700, color: "var(--ink)", opacity: 0.2 }}>Keggo<span style={{ color: "var(--tomato)" }}>.</span></span>
+                </div>
+              )}
+              <div className="profile-body" style={{ padding: "20px 0 0" }}>
+                <div className="profile-name">{profile.displayName || venueName}</div>
+                <div className="profile-area">{venueArea || "Local venue"}</div>
+                {profile.bio && <div className="profile-bio">{profile.bio}</div>}
+                {profile.address && (
+                  <>
+                    <div className="profile-section-title">Find us</div>
+                    <p style={{ fontSize: "14px", color: "var(--ink-soft)", marginBottom: "10px" }}>{profile.address}</p>
+                    <iframe src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDZ7TpD33-fiGsc85FnDJbHl9OKuz3wXkM&q=${encodeURIComponent(profile.address)}`} style={{ width: "100%", height: "180px", borderRadius: "12px", border: "2px solid var(--ink)", marginBottom: "20px" }} allowFullScreen="" loading="lazy"></iframe>
+                  </>
+                )}
+                {profile.services.length > 0 && (
+                  <>
+                    <div className="profile-section-title">What we offer <span className="scribble">the good stuff</span></div>
+                    <div className="service-tags">
+                      {profile.services.map(s => <span key={s} className="service-tag active">{s}</span>)}
+                    </div>
+                  </>
+                )}
+                {Object.values(profile.hours).some(h => h) && (
+                  <>
+                    <div className="profile-section-title">Opening hours</div>
+                    <div className="hours-grid">
+                      {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day => (
+                        <React.Fragment key={day}>
+                          <div className="hours-day">{day}</div>
+                          <div className="hours-time">{profile.hours[day] || "Closed"}</div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {profile.website && (
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer" className="profile-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/></svg>
+                    Visit website
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* --- Edit Venue Profile (for venue owners) --- */
+    function EditVenueProfile({ user, profiles, onSave, onCancel }) {
+      const existing = profiles[user.name] || { displayName: "", address: "", bio: "", website: "", photo: null, services: [], hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" } };
+      const [displayName, setDisplayName] = useState(existing.displayName || "");
+      const [address, setAddress] = useState(existing.address || "");
+      const [bio, setBio] = useState(existing.bio);
+      const [website, setWebsite] = useState(existing.website);
+      const [photo, setPhoto] = useState(existing.photo);
+      const [services, setServices] = useState(existing.services);
+      const [hours, setHours] = useState(existing.hours);
+      const photoInputRef = useRef(null);
+      const addressInputRef = useRef(null);
+      const autocompleteRef = useRef(null);
+
+      const currentImage = photo || VENUE_IMAGES_DEFAULT[user.name] || null;
+
+      useEffect(() => {
+        let interval;
+        const initAutocomplete = () => {
+          if (window.google && window.google.maps && window.google.maps.places && addressInputRef.current && !autocompleteRef.current) {
+            autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
+              componentRestrictions: { country: 'gb' },
+              fields: ['formatted_address', 'geometry', 'name']
+            });
+            autocompleteRef.current.addListener('place_changed', () => {
+              const place = autocompleteRef.current.getPlace();
+              if (place && place.formatted_address) {
+                setAddress(place.formatted_address);
+              }
+            });
+          }
+        };
+        initAutocomplete();
+        if (!autocompleteRef.current) {
+          interval = setInterval(initAutocomplete, 200);
+        }
+        return () => { if (interval) clearInterval(interval); };
+      }, []);
+
+      const toggleService = (s) => {
+        setServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+      };
+
+      const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => setPhoto(reader.result);
+          reader.readAsDataURL(file);
+        }
+      };
+
+      const handleSave = () => {
+        onSave(user.name, { displayName, address, bio, website, photo, services, hours });
+      };
+
+      return (
+        <div className="form-panel">
+          <h2>Venue Profile</h2>
+          <p className="subtitle" style={{ marginBottom: "20px" }}>Tell people about {user.name}</p>
+
+          <div style={{ marginBottom: "20px" }}>
+            <div className="profile-section-title">Venue Photo <span className="scribble">your best side</span></div>
+            <div className="poster-upload" onClick={() => photoInputRef.current?.click()}>
+              {currentImage ? (
+                <img src={currentImage} alt={user.name} style={{ width: "100%", height: "160px", objectFit: "cover", borderRadius: "12px", border: "2px solid var(--ink)" }} />
+              ) : (
+                <div className="poster-upload-content">
+                  <div className="poster-upload-icon"><SVGImageIcon /></div>
+                  <div className="poster-upload-text">Click to upload a photo of your venue</div>
+                </div>
+              )}
+              <input type="file" ref={photoInputRef} accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
+            </div>
+            {photo && (
+              <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", color: "var(--tomato)", fontFamily: "'Fredoka', sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer", marginTop: "6px" }}>Remove uploaded photo</button>
+            )}
+          </div>
+
+          <div className="form-grid full">
+            <div className="field">
+              <label>Display Name</label>
+              <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="e.g. The Pelican" />
+            </div>
+          </div>
+          <div className="form-grid full" style={{ marginTop: "10px" }}>
+            <div className="field">
+              <label>Address</label>
+              <input type="text" ref={addressInputRef} value={address} onChange={e => setAddress(e.target.value)} placeholder="e.g. 26 Church Road, Addlestone KT15 1EL" />
+            </div>
+          </div>
+          {address && (
+            <iframe
+              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDZ7TpD33-fiGsc85FnDJbHl9OKuz3wXkM&q=${encodeURIComponent(address)}`}
+              style={{ width: "100%", height: "180px", borderRadius: "12px", border: "2px solid var(--ink)", marginTop: "12px" }}
+              allowFullScreen="" loading="lazy"
+            ></iframe>
+          )}
+          <div className="form-grid full" style={{ marginTop: "10px" }}>
+            <div className="field">
+              <label>About your venue</label>
+              <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="A warm welcome since 1842..." style={{ minHeight: "80px" }}></textarea>
+            </div>
+          </div>
+          <div className="form-grid full" style={{ marginTop: "10px" }}>
+            <div className="field">
+              <label>Website</label>
+              <input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://yourpub.co.uk" />
+            </div>
+          </div>
+
+          <div style={{ marginTop: "20px" }}>
+            <div className="profile-section-title">Services <span className="scribble">tap to toggle</span></div>
+            <div className="service-tags">
+              {ALL_SERVICES.map(s => (
+                <span key={s} className={`service-tag toggle ${services.includes(s) ? "active" : ""}`} onClick={() => toggleService(s)}>{s}</span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: "16px" }}>
+            <div className="profile-section-title">Opening hours</div>
+            <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: "8px 12px", alignItems: "center" }}>
+              {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day => (
+                <React.Fragment key={day}>
+                  <label style={{ fontFamily: "'Fredoka', sans-serif", fontWeight: 600, fontSize: "13px" }}>{day}</label>
+                  <input type="text" value={hours[day] || ""} onChange={e => setHours(prev => ({ ...prev, [day]: e.target.value }))} placeholder="e.g. 12:00 – 23:00" style={{ padding: "8px 12px", border: "2px solid var(--ink)", borderRadius: "8px", fontFamily: "'Inter', sans-serif", fontSize: "13px", background: "var(--cream)", outline: "none" }} />
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-actions" style={{ marginTop: "24px" }}>
+            <button className="btn-ghost" onClick={onCancel}>Cancel</button>
+            <button className="btn-primary" onClick={handleSave}>Save Profile</button>
+          </div>
+        </div>
+      );
+    }
+
+    function LoginModal({ onLogin, onClose }) {
+      const [tab, setTab] = useState("user");
+      const [email, setEmail] = useState("");
+      const [password, setPassword] = useState("");
+      const [error, setError] = useState("");
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setError("");
+        const account = DEMO_ACCOUNTS.find(a => a.email === email && a.password === password);
+        if (account) { onLogin(account); setEmail(""); setPassword(""); } else { setError("Invalid email or password"); }
+      };
+
+      const handleGoogleSignIn = async () => {
+        setLoading(true);
+        setError("");
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin + window.location.pathname }
+        });
+        if (error) { setError(error.message); setLoading(false); }
+      };
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>&times;</button>
+            <div style={{ textAlign: "center", marginBottom: "6px" }}>
+              <span style={{ fontFamily: "'Fredoka', sans-serif", fontWeight: 700, fontSize: "32px", color: "#1A1715", letterSpacing: "-0.03em" }}>Keggo<span style={{ color: "#D84A2A" }}>.</span></span>
+            </div>
+            <p style={{ fontFamily: "'Caveat', cursive", fontSize: "20px", fontWeight: 700, color: "#D84A2A", textAlign: "center", marginBottom: "20px", transform: "rotate(-2deg)" }}>sign in, find what's on!</p>
+            <div className="login-tabs">
+              <button className={`login-tab ${tab === "user" ? "active" : ""}`} onClick={() => setTab("user")}>User</button>
+              <button className={`login-tab ${tab === "venue" ? "active" : ""}`} onClick={() => setTab("venue")}>Venue</button>
+            </div>
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="form-field"><label>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={tab === "user" ? "user@demo.com" : "demo@demo.com"} required /></div>
+              <div className="form-field"><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="demo" required /></div>
+              {error && <p className="form-error">{error}</p>}
+              <button type="submit" className="form-submit">Sign In</button>
+            </form>
+            <div style={{ margin: "14px 0", textAlign: "center", fontFamily: "'Caveat', cursive", fontSize: "16px", fontWeight: 700, color: "#968e7f" }}>or</div>
+            <div className="oauth-btns">
+              <button className="oauth-btn" onClick={handleGoogleSignIn} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                {loading ? "Connecting..." : "Google"}
+              </button>
+              <button className="oauth-btn" disabled>Apple</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function EventDetailModal({ event, onClose, onSave, savedEvents, showToast, userLocation, onViewVenue, venueProfiles }) {
+      const isSaved = savedEvents.some(e => e.id === event.id);
+      const coords = VENUE_COORDS[event.venue];
+      const handleSave = () => { onSave(event); showToast(isSaved ? "Removed from saved" : "Added to saved"); };
+      const handleShare = () => { showToast("Link copied to clipboard"); };
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="detail-modal" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>&times;</button>
+            <img src={getPosterImage(event, venueProfiles)} alt={event.title} className="detail-poster" />
+            <div className="detail-header">
+              <div>
+                <h1 className="detail-title">{event.title}</h1>
+                <p className="card-venue-link" onClick={() => { onClose(); onViewVenue(event.venue, event.area); }} style={{ marginBottom: "6px" }}>{event.venue}</p>
+              </div>
+              <div className="detail-actions">
+                <button className={`detail-action-btn ${isSaved ? "saved" : ""}`} onClick={handleSave} title={isSaved ? "Remove" : "Save"}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                </button>
+                <button className="detail-action-btn" onClick={handleShare} title="Share">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                </button>
+              </div>
+            </div>
+            <div className="detail-info-grid">
+              <div className="detail-info-item"><div className="detail-info-label">Date</div><div className="detail-info-value">{formatDateLong(event.date)}</div></div>
+              <div className="detail-info-item"><div className="detail-info-label">Time</div><div className="detail-info-value">{event.time}</div></div>
+              <div className="detail-info-item"><div className="detail-info-label">Price</div><div className="detail-info-value" style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)" }}>{event.price}</div></div>
+              <div className="detail-info-item"><div className="detail-info-label">Distance</div><div className="detail-info-value">{getEventDistance(event, userLocation) ? formatDistance(getEventDistance(event, userLocation)) : "Unknown"}</div></div>
+            </div>
+            <div className="detail-description">{event.description}</div>
+            <h3 style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "16px", fontWeight: 700, marginBottom: "12px", marginTop: "16px" }}>Location</h3>
+            {coords && <iframe src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDZ7TpD33-fiGsc85FnDJbHl9OKuz3wXkM&q=${coords.lat},${coords.lng}&zoom=16`} className="google-map-embed" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>}
+          </div>
+        </div>
+      );
+    }
+
+    function AddEventForm({ user, onSubmit, onCancel, initialEvent }) {
+      const [form, setForm] = useState(initialEvent || { title: "", date: genDate(0), time: "19:00", price: "", category: "other", description: "", location: "", poster: null, sportType: null });
+      const fileInputRef = useRef(null);
+      const locationInputRef = useRef(null);
+      const locationAutocompleteRef = useRef(null);
+
+      useEffect(() => {
+        let interval;
+        const initAutocomplete = () => {
+          if (window.google && window.google.maps && window.google.maps.places && locationInputRef.current && !locationAutocompleteRef.current) {
+            locationAutocompleteRef.current = new google.maps.places.Autocomplete(locationInputRef.current, {
+              componentRestrictions: { country: 'gb' },
+              fields: ['formatted_address', 'geometry', 'name']
+            });
+            locationAutocompleteRef.current.addListener('place_changed', () => {
+              const place = locationAutocompleteRef.current.getPlace();
+              if (place && place.formatted_address) {
+                setForm(prev => ({ ...prev, location: place.formatted_address }));
+              }
+            });
+          }
+        };
+        initAutocomplete();
+        if (!locationAutocompleteRef.current) {
+          interval = setInterval(initAutocomplete, 200);
+        }
+        return () => { if (interval) clearInterval(interval); };
+      }, []);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "category" && value !== "sports") {
+          setForm(prev => ({ ...prev, [name]: value, sportType: null }));
+        } else {
+          setForm(prev => ({ ...prev, [name]: value }));
+        }
+      };
+      const handleFileChange = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setForm(prev => ({ ...prev, poster: reader.result })); }; reader.readAsDataURL(file); } };
+      const handleSubmit = (e) => { e.preventDefault(); onSubmit({ ...form, venue: user.name, area: user.area, createdBy: user.email }); setForm({ title: "", date: genDate(0), time: "19:00", price: "", category: "other", description: "", location: "", poster: null, sportType: null }); };
+      return (
+        <div className="form-panel">
+          <h2>{initialEvent ? "Edit Event" : "Create Event"}</h2>
+          <p className="subtitle">Share what's happening at {user.name}</p>
+          <form onSubmit={handleSubmit}>
+            <div className="poster-upload" onClick={() => fileInputRef.current?.click()}>
+              {form.poster ? (<img src={form.poster} alt="Preview" className="poster-preview" />) : (
+                <div className="poster-upload-content"><div className="poster-upload-icon"><SVGImageIcon /></div><div className="poster-upload-text">Click to upload a poster</div></div>
+              )}
+              <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
+            </div>
+            <div className="form-grid">
+              <div className="field"><label>Event Title</label><input type="text" name="title" value={form.title} onChange={handleChange} placeholder="e.g. Live Jazz Night" required /></div>
+              <div className="field"><label>Category</label><select name="category" value={form.category} onChange={handleChange}>{CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}</select></div>
+            </div>
+            {form.category === "sports" && (
+              <div className="form-grid full" style={{ marginTop: "4px" }}>
+                <div className="field">
+                  <label>Sport</label>
+                  <select name="sportType" value={form.sportType || ""} onChange={handleChange}>
+                    <option value="">Select sport...</option>
+                    {SPORT_TYPES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+            <div className="form-grid">
+              <div className="field"><label>Date</label><input type="date" name="date" value={form.date} onChange={handleChange} min={genDate(0)} required /></div>
+              <div className="field"><label>Time</label><input type="time" name="time" value={form.time} onChange={handleChange} required /></div>
+            </div>
+            <div className="form-grid full"><div className="field"><label>Price</label><input type="text" name="price" value={form.price} onChange={handleChange} placeholder="e.g. \u00a310 or Free" /></div></div>
+            <div className="form-grid full"><div className="field"><label>Location / Address</label><input type="text" ref={locationInputRef} name="location" value={form.location} onChange={handleChange} placeholder="e.g. 123 High Street, Addlestone KT15" /></div></div>
+            <div className="form-grid full"><div className="field"><label>Description</label><textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell people what to expect..." required></textarea></div></div>
+            <div className="form-actions"><button type="button" className="btn-ghost" onClick={onCancel}>Cancel</button><button type="submit" className="btn-primary">{initialEvent ? "Update Event" : "Create Event"}</button></div>
+          </form>
+        </div>
+      );
+    }
+
+    function MapView({ events, selectedEvent, onSelectEvent, userLocation, venueProfiles }) {
+      const mapRef = useRef(null);
+      const mapInstance = useRef(null);
+      const markersRef = useRef([]);
+      const [mapReady, setMapReady] = useState(false);
+
+      useEffect(() => {
+        let interval;
+        const initMap = () => {
+          if (window.google && window.google.maps && mapRef.current && !mapInstance.current) {
+            const center = userLocation || { lat: 51.378, lng: -0.475 };
+            mapInstance.current = new google.maps.Map(mapRef.current, {
+              center: center,
+              zoom: 13,
+              styles: GMAP_STYLES,
+              disableDefaultUI: false,
+              zoomControl: true,
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: false,
+            });
+            setMapReady(true);
+            if (interval) clearInterval(interval);
+          }
+        };
+        initMap();
+        if (!mapInstance.current) {
+          interval = setInterval(initMap, 200);
+        }
+        return () => { if (interval) clearInterval(interval); };
+      }, []);
+
+      useEffect(() => {
+        if (!mapInstance.current || !mapReady) return;
+        // Clear existing markers
+        markersRef.current.forEach(m => m.setMap(null));
+        markersRef.current = [];
+
+        events.forEach(event => {
+          const coords = VENUE_COORDS[event.venue];
+          if (coords) {
+            const marker = new google.maps.Marker({
+              position: { lat: coords.lat, lng: coords.lng },
+              map: mapInstance.current,
+              icon: {
+                url: createMapMarkerSVG(event.category),
+                scaledSize: new google.maps.Size(44, 44),
+                anchor: new google.maps.Point(22, 22),
+              },
+              title: event.title,
+            });
+            marker.addListener('click', () => {
+              onSelectEvent(event);
+              mapInstance.current.panTo({ lat: coords.lat, lng: coords.lng });
+            });
+            markersRef.current.push(marker);
+          }
+        });
+      }, [events, mapReady, onSelectEvent]);
+
+      useEffect(() => {
+        if (mapInstance.current && selectedEvent) {
+          const coords = VENUE_COORDS[selectedEvent.venue];
+          if (coords) {
+            mapInstance.current.panTo({ lat: coords.lat, lng: coords.lng });
+          }
+        }
+      }, [selectedEvent]);
+
+      return (
+        <div className="map-wrap">
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <div ref={mapRef} className="map-frame" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}></div>
+            {!mapReady && (
+              <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--cream)", zIndex: 2 }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ width: "32px", height: "32px", border: "3px solid var(--ink)", borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 12px" }} className="spin"></div>
+                  <span style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "14px", fontWeight: 600, color: "var(--grey-400)" }}>Loading map...</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="map-sidebar">
+            {events.map(event => (
+              <div key={event.id} className={`map-event-chip ${selectedEvent?.id === event.id ? "active" : ""}`} onClick={() => onSelectEvent(event)}>
+                <img className="map-event-chip-img" src={getPosterImage(event, venueProfiles)} alt={event.venue} loading="lazy" />
+                <div className="map-event-chip-info">
+                  <div className="map-event-chip-title">{event.title}</div>
+                  <div className="map-event-chip-venue">{event.venue}</div>
+                  <div className="map-event-chip-meta">{formatDate(event.date).weekday} &middot; {event.time}</div>
+                  <div className="map-event-chip-price" style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)" }}>{event.price}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [user, setUser] = useState(null);
+      const [authLoading, setAuthLoading] = useState(true);
+      const [events, setEvents] = useState(INITIAL_EVENTS);
+      const [savedEvents, setSavedEvents] = useState([]);
+      const [view, setView] = useState("grid");
+      const [search, setSearch] = useState("");
+      const [category, setCategory] = useState([]);
+      const [dateFilter, setDateFilter] = useState("any");
+      const [dateRange, setDateRange] = useState({ start: genDate(0), end: genDate(30) });
+      const [distanceFilter, setDistanceFilter] = useState(10);
+      const [sportFilter, setSportFilter] = useState(null);
+      const [showMoreCats, setShowMoreCats] = useState(false);
+      const [userLocation, setUserLocation] = useState(null);
+      const [locationInput, setLocationInput] = useState("");
+      const [showAddEvent, setShowAddEvent] = useState(false);
+      const [editingEvent, setEditingEvent] = useState(null);
+      const [selectedEvent, setSelectedEvent] = useState(null);
+      const [toast, setToast] = useState(null);
+      const [venueProfiles, setVenueProfiles] = useState(DEFAULT_PROFILES);
+      const [viewingVenue, setViewingVenue] = useState(null);
+      const [exploreTab, setExploreTab] = useState("events");
+      const locationSearchRef = useRef(null);
+      const locationSearchAutocompleteRef = useRef(null);
+
+      /* --- Supabase auth: check session on load + listen for changes --- */
+      const mapSupabaseUser = useCallback((supaUser) => {
+        if (!supaUser) return null;
+        const meta = supaUser.user_metadata || {};
+        return {
+          email: supaUser.email,
+          name: meta.full_name || meta.name || supaUser.email.split("@")[0],
+          type: "user",
+          area: "Local",
+          avatar_url: meta.avatar_url || meta.picture || null,
+          supabaseId: supaUser.id,
+        };
+      }, []);
+
+      useEffect(() => {
+        let mounted = true;
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (mounted && session?.user) setUser(mapSupabaseUser(session.user));
+          if (mounted) setAuthLoading(false);
+        });
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (mounted) {
+            if (session?.user) setUser(mapSupabaseUser(session.user));
+            else setUser(null);
+            setAuthLoading(false);
+          }
+        });
+        return () => { mounted = false; subscription.unsubscribe(); };
+      }, [mapSupabaseUser]);
+
+      const handleSignOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (!error) setUser(null);
+      };
+
+      useEffect(() => {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }), () => setUserLocation(null));
+        }
+      }, []);
+
+      useEffect(() => {
+        // Only attempt to bind when the search input is actually rendered (Events tab)
+        if (exploreTab !== "events") return;
+        let interval;
+        let cancelled = false;
+        const initAutocomplete = () => {
+          if (cancelled) return true;
+          if (!locationSearchRef.current) return false;
+          if (!(window.google && window.google.maps && window.google.maps.places)) return false;
+          // Re-bind if the underlying DOM input has changed (e.g. tab switch unmounted/remounted it)
+          if (locationSearchAutocompleteRef.current && locationSearchAutocompleteRef.current.__bound === locationSearchRef.current) {
+            return true;
+          }
+          const ac = new google.maps.places.Autocomplete(locationSearchRef.current, {
+            componentRestrictions: { country: 'gb' },
+            fields: ['geometry', 'name', 'formatted_address'],
+            types: ['establishment', 'geocode']
+          });
+          ac.__bound = locationSearchRef.current;
+          ac.addListener('place_changed', () => {
+            const place = ac.getPlace();
+            if (place && place.geometry && place.geometry.location) {
+              setUserLocation({
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
+              });
+              setLocationInput(place.name || place.formatted_address || '');
+            }
+          });
+          // Stop the browser autofill stomping on the dropdown
+          locationSearchRef.current.setAttribute('autocomplete', 'off');
+          locationSearchAutocompleteRef.current = ac;
+          if (interval) { clearInterval(interval); interval = null; }
+          return true;
+        };
+        if (!initAutocomplete()) {
+          interval = setInterval(initAutocomplete, 250);
+        }
+        return () => { cancelled = true; if (interval) clearInterval(interval); };
+      }, [exploreTab]);
+
+      const showToast = useCallback((msg) => { setToast(msg); setTimeout(() => setToast(null), 2000); }, []);
+
+      const handleLocationInput = (e) => {
+        const raw = e.target.value;
+        setLocationInput(raw);
+        const trimmed = raw.trim();
+        const normalized = trimmed.toUpperCase();
+        if (LOCATION_LOOKUP[normalized] || LOCATION_LOOKUP[trimmed]) {
+          setUserLocation(LOCATION_LOOKUP[normalized] || LOCATION_LOOKUP[trimmed]);
+        }
+      };
+
+      const handleUseMyLocation = () => {
+        showToast("📍 Coming soon — type a postcode or pub name to search by location");
+      };
+
+      const filteredEvents = useMemo(() => {
+        let result = events;
+        if (search && search.trim()) {
+          const tokens = search.toLowerCase().trim().split(/\s+/).filter(Boolean);
+          result = result.filter(e => {
+            const catLabel = (CATEGORIES.find(c => c.id === e.category)?.label || "").toLowerCase();
+            const sportLabel = (SPORT_TYPES.find(s => s.id === e.sportType)?.label || "").toLowerCase();
+            const haystack = [
+              e.title, e.venue, e.area, e.description, e.location,
+              catLabel, sportLabel, e.category, e.sportType, e.price, e.time
+            ].filter(Boolean).join(" ").toLowerCase();
+            return tokens.every(t => haystack.includes(t));
+          });
+        }
+        if (category.length > 0) result = result.filter(e => category.includes(e.category));
+        if (category.includes("sports") && sportFilter) {
+          result = result.filter(e => e.category !== "sports" || e.sportType === sportFilter);
+        }
+        if (dateFilter === "month") {
+          const now = new Date();
+          result = result.filter(e => {
+            const d = new Date(e.date + "T00:00:00");
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          });
+        }
+        else if (dateFilter === "range") {
+          const { start, end } = dateRange;
+          if (start && end && end >= start) {
+            result = result.filter(e => e.date >= start && e.date <= end);
+          }
+        }
+        if (distanceFilter > 0 && userLocation) result = result.filter(e => { const dist = getEventDistance(e, userLocation); return dist !== null && dist <= distanceFilter; });
+        return result.sort((a, b) => new Date(a.date) - new Date(b.date));
+      }, [events, search, category, sportFilter, dateFilter, dateRange.start, dateRange.end, distanceFilter, userLocation]);
+
+      const handleSaveEvent = (event) => { setSavedEvents(prev => prev.some(e => e.id === event.id) ? prev.filter(e => e.id !== event.id) : [...prev, event]); };
+
+      const handleAddEvent = (newEvent) => {
+        if (editingEvent) { setEvents(events.map(e => e.id === editingEvent.id ? { ...newEvent, id: e.id } : e)); setEditingEvent(null); }
+        else { setEvents([...events, { ...newEvent, id: Math.max(...events.map(e => e.id), 0) + 1 }]); }
+        setShowAddEvent(false);
+        showToast(editingEvent ? "Event updated" : "Event created");
+      };
+
+      const handleDeleteEvent = (id) => { if (confirm("Delete this event?")) { setEvents(events.filter(e => e.id !== id)); showToast("Event deleted"); } };
+      const handleNavAdd = () => { setEditingEvent(null); setShowAddEvent(true); };
+
+      const handleSaveProfile = (name, data) => {
+        setVenueProfiles(prev => ({ ...prev, [name]: data }));
+        setView("grid");
+        showToast("Profile saved");
+      };
+
+      const handleViewVenue = (name, area) => { setViewingVenue({ name, area }); };
+
+      if (authLoading) return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "var(--paper)" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontFamily: "'Fredoka', sans-serif", fontWeight: 700, fontSize: "36px", color: "var(--ink)", letterSpacing: "-0.03em", marginBottom: "16px" }}>Keggo<span style={{ color: "var(--tomato)" }}>.</span></div>
+            <div style={{ width: "32px", height: "32px", border: "3px solid var(--ink)", borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto" }} className="spin"></div>
+          </div>
+        </div>
+      );
+      if (!user) return <LoginModal onLogin={setUser} onClose={() => {}} />;
+
+      const myEvents = user.type === "venue" ? events.filter(e => e.createdBy === user.email) : [];
+      const currentNav = showAddEvent ? "add" : view === "my-events" ? "my-events" : view === "saved" ? "saved" : view === "profile" ? "profile" : "explore";
+
+      return (
+        <div>
+          <header className="header">
+            <div className="header-inner">
+              <div className="logo"><div className="logo-mark">Keggo<span className="dot">.</span><span className="beta-tag">BETA</span></div></div>
+              <div className="nav-pills">
+                <button className={`nav-pill ${currentNav === "explore" ? "active" : ""}`} onClick={() => { setView("grid"); setShowAddEvent(false); }}>Explore</button>
+                {user.type === "venue" && <button className={`nav-pill ${currentNav === "my-events" ? "active" : ""}`} onClick={() => { setView("my-events"); setShowAddEvent(false); }}>My Events</button>}
+                {user.type === "venue" && <button className={`nav-pill ${currentNav === "profile" ? "active" : ""}`} onClick={() => { setView("profile"); setShowAddEvent(false); }}>Profile</button>}
+                <button className={`nav-pill ${currentNav === "saved" ? "active" : ""}`} onClick={() => { setView("saved"); setShowAddEvent(false); }}>
+                  Saved{savedEvents.length > 0 && <span className="badge">{savedEvents.length}</span>}
+                </button>
+              </div>
+              <div className="user-menu">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt={user.name} className="user-avatar" style={{ objectFit: "cover" }} referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="user-avatar">{user.name.charAt(0).toUpperCase()}</div>
+                )}
+                <span className="user-name">{user.name}</span>
+                <button className="logout-btn" onClick={handleSignOut}>Sign out</button>
+              </div>
+            </div>
+          </header>
+
+          {showAddEvent && user.type === "venue" && (
+            <div className="container" style={{ paddingTop: "0" }}>
+              <AddEventForm user={user} onSubmit={handleAddEvent} onCancel={() => { setShowAddEvent(false); setEditingEvent(null); }} initialEvent={editingEvent} />
+            </div>
+          )}
+
+          {!showAddEvent && (
+            <>
+              {currentNav === "explore" && (
+                <div className="container">
+                  <div className="hero">
+                    <div className="hero-badge"><span className="dot"></span> Live events near you</div>
+                    <div className="hero-scribble">a little look at</div>
+                    <h2>What's on <em>tonight?</em></h2>
+                    <p>Find the best events at your favourite local pubs</p>
+                  </div>
+
+                  <div className="explore-tabs">
+                    <button className={`explore-tab ${exploreTab === "events" ? "active" : ""}`} onClick={() => setExploreTab("events")}>Events</button>
+                    <button className={`explore-tab ${exploreTab === "venues" ? "active" : ""}`} onClick={() => setExploreTab("venues")}>Venues</button>
+                  </div>
+
+                  {exploreTab === "venues" && (
+                    <div className="venue-grid">
+                      {Object.keys(venueProfiles).filter(name => name !== "Demo Venue").map(name => {
+                        const profile = venueProfiles[name];
+                        const venueImg = getVenueImage(name, venueProfiles);
+                        const area = DEMO_ACCOUNTS.find(a => a.name === name)?.area ||
+                          INITIAL_EVENTS.find(e => e.venue === name)?.area ||
+                          "Local";
+                        return (
+                          <div key={name} className="venue-card" onClick={() => handleViewVenue(name, area)}>
+                            {venueImg ? (
+                              <img src={venueImg} alt={name} className="venue-card-img" />
+                            ) : (
+                              <div className="venue-card-img" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <span style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "24px", fontWeight: 700, color: "var(--ink)", opacity: 0.15 }}>Keggo<span style={{ color: "var(--tomato)" }}>.</span></span>
+                              </div>
+                            )}
+                            <div className="venue-card-body">
+                              <div className="venue-card-name">{profile.displayName || name}</div>
+                              <div className="venue-card-area">{area}</div>
+                              {profile.bio && <div className="venue-card-bio">{profile.bio}</div>}
+                              <div className="venue-card-services">
+                                {profile.services.slice(0, 4).map(s => <span key={s} className="mini-tag">{s}</span>)}
+                                {profile.services.length > 4 && <span className="mini-tag">+{profile.services.length - 4}</span>}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {exploreTab === "events" && (
+                    <>
+                      <div className="search-bar">
+                        <div className="search-input-wrap">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                          <input type="text" placeholder="Search events..." value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        {user.type === "venue" && <button className="btn-primary" onClick={handleNavAdd}>Add Event</button>}
+                      </div>
+                      <div className="location-input-wrap" style={{ marginBottom: "20px" }}>
+                        <input type="text" ref={locationSearchRef} className="location-input" placeholder="Search pub name, postcode, or area..." onChange={handleLocationInput} autoComplete="off" />
+                        <button className="location-btn" onClick={handleUseMyLocation} style={{ opacity: 0.55, cursor: "not-allowed" }} title="Coming soon — use the search box for now">📍 Use My Location</button>
+                      </div>
+                      <div className="filter-row">
+                        <select className="filter-select" value={dateFilter} onChange={e => setDateFilter(e.target.value)}><option value="any">Any Date</option><option value="month">This Month</option><option value="range">Date Range</option></select>
+                        {dateFilter === "range" && (
+                          <>
+                            <label style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "13px", fontWeight: 600, color: "var(--grey-600)", alignSelf: "center" }}>From</label>
+                            <input type="date" className="filter-select" value={dateRange.start} onChange={e => { const s = e.target.value; if (s) setDateRange(prev => ({ start: s, end: prev.end >= s ? prev.end : s })); }} min={genDate(0)} />
+                            <label style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "13px", fontWeight: 600, color: "var(--grey-600)", alignSelf: "center" }}>To</label>
+                            <input type="date" className="filter-select" value={dateRange.end} onChange={e => { const s = e.target.value; if (s) setDateRange(prev => ({ ...prev, end: s })); }} min={dateRange.start || genDate(0)} />
+                          </>
+                        )}
+                        {userLocation && <select className="filter-select" value={distanceFilter} onChange={e => setDistanceFilter(Number(e.target.value))}>{DISTANCE_OPTIONS.map(opt => <option key={opt.val} value={opt.val}>{opt.label}</option>)}</select>}
+                        {(search || category.length > 0 || sportFilter || dateFilter !== "any" || distanceFilter > 0) && <button className="clear-btn" onClick={() => { setSearch(""); setCategory([]); setSportFilter(null); setShowMoreCats(false); setDateFilter("any"); setDistanceFilter(0); }}>Clear filters</button>}
+                      </div>
+                      {/* ── Main category chips ── */}
+                      <div className="cat-chips">
+                        {MAIN_CATEGORIES.map(cat => (
+                          <button
+                            key={cat.id}
+                            className={`cat-chip ${category.includes(cat.id) ? "active" : ""}`}
+                            onClick={() => {
+                              setCategory(prev => prev.includes(cat.id) ? prev.filter(c => c !== cat.id) : [...prev, cat.id]);
+                              if (cat.id !== "sports") setSportFilter(null);
+                            }}
+                          >
+                            <img src={`${SVG_BASE}${cat.svgFile}.svg`} width="18" height="18" alt="" />
+                            {cat.label}
+                          </button>
+                        ))}
+                        <button
+                          className={`cat-chip ${showMoreCats ? "active" : ""}`}
+                          onClick={() => setShowMoreCats(v => !v)}
+                        >
+                          {showMoreCats ? "Less" : "More"}
+                        </button>
+                      </div>
+
+                      {/* ── Sport sub-categories (shown when Live Sport selected) ── */}
+                      {category.includes("sports") && (
+                        <div className="cat-chips cat-chips-sport">
+                          <button
+                            className={`cat-chip ${!sportFilter ? "active" : ""}`}
+                            onClick={() => setSportFilter(null)}
+                          >All Sport</button>
+                          {SPORT_SUBTYPES.map(s => (
+                            <button
+                              key={s.id}
+                              className={`cat-chip ${sportFilter === s.id ? "active" : ""}`}
+                              onClick={() => setSportFilter(prev => prev === s.id ? null : s.id)}
+                            >
+                              <img src={`${SVG_BASE}${s.svgFile}.svg`} width="18" height="18" alt="" />
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* ── More / "Also Happening" categories ── */}
+                      {showMoreCats && (
+                        <div className="cat-chips cat-chips-more">
+                          {SECONDARY_CATEGORIES.map(cat => (
+                            <button
+                              key={cat.id}
+                              className={`cat-chip ${category.includes(cat.id) ? "active" : ""}`}
+                              onClick={() => setCategory(prev => prev.includes(cat.id) ? prev.filter(c => c !== cat.id) : [...prev, cat.id])}
+                            >
+                              <img src={`${SVG_BASE}${cat.svgFile}.svg`} width="18" height="18" alt="" />
+                              {cat.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <div className="results-bar">
+                        <div className="count"><strong>{filteredEvents.length}</strong> events found</div>
+                        <div className="view-btns">
+                          <button className={`view-btn ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")} title="Grid"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+                          <button className={`view-btn ${view === "list" ? "active" : ""}`} onClick={() => setView("list")} title="List"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg></button>
+                          <button className={`view-btn ${view === "map" ? "active" : ""}`} onClick={() => setView("map")} title="Map"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 10c0 6.075-9 13-9 13s-9-6.925-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg></button>
+                        </div>
+                      </div>
+
+                      {view === "grid" && (
+                        <div className="events-grid">
+                          {filteredEvents.map(event => {
+                            const catStyle = CAT_STYLES[event.category] || CAT_STYLES.other;
+                            return (
+                              <div key={event.id} className="card" onClick={() => setSelectedEvent(event)}>
+                                <div className="card-image-wrap">
+                                  <img src={getPosterImage(event, venueProfiles)} alt={event.title} className="card-image" />
+                                  <CardIconBadge category={event.category} />
+                                </div>
+                                <div className="card-content">
+                                  <span className="card-cat-tag" style={{ background: catStyle.bg, color: catStyle.text }}>{CATEGORIES.find(c => c.id === event.category)?.label}</span>
+                                  {event.sportType && <span className="sport-sub-tag">{SPORT_TYPES.find(s => s.id === event.sportType)?.label}</span>}
+                                  <h3 className="card-title">{event.title}</h3>
+                                  <span className="card-venue-link" onClick={e => { e.stopPropagation(); handleViewVenue(event.venue, event.area); }}>{event.venue}</span>
+                                  <div className="card-meta">
+                                    <span>{formatDate(event.date).weekday}</span><span>{event.time}</span>
+                                    <span style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)", fontWeight: "700" }}>{event.price}</span>
+                                  </div>
+                                  <div className="card-badges">
+                                    <div className="card-badge" onClick={e => { e.stopPropagation(); handleSaveEvent(event); }} title="Save"><svg width="14" height="14" viewBox="0 0 24 24" fill={savedEvents.some(s => s.id === event.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {view === "list" && (
+                        <div className="events-list">
+                          {filteredEvents.map(event => {
+                            const catStyle = CAT_STYLES[event.category] || CAT_STYLES.other;
+                            return (
+                              <div key={event.id} className="list-item" onClick={() => setSelectedEvent(event)} style={{ borderLeftColor: catStyle.bg }}>
+                                <img src={getPosterImage(event, venueProfiles)} alt={event.title} className="list-item-img" />
+                                <div className="list-item-body">
+                                  <div className="list-item-title">{event.title}</div>
+                                  <div className="list-item-venue" onClick={e => { e.stopPropagation(); handleViewVenue(event.venue, event.area); }} style={{ cursor: "pointer", textDecoration: "underline dotted", textUnderlineOffset: "2px" }}>{event.venue}</div>
+                                  <div className="list-item-meta">{formatDate(event.date).weekday} &middot; {event.time} &middot; <span style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)", fontWeight: "700" }}>{event.price}</span>{event.sportType && <span className="sport-sub-tag" style={{ marginLeft: "6px" }}>{SPORT_TYPES.find(s => s.id === event.sportType)?.label}</span>}</div>
+                                  <div className="list-item-desc">{event.description.substring(0, 100)}...</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {view === "map" && <MapView events={filteredEvents} selectedEvent={selectedEvent} onSelectEvent={setSelectedEvent} userLocation={userLocation} venueProfiles={venueProfiles} />}
+
+                      {filteredEvents.length === 0 && (
+                        <div className="empty">
+                          <div style={{ fontFamily: "'Caveat', cursive", fontSize: "40px", marginBottom: "14px", opacity: "0.5", color: "var(--tomato)" }}>hmm...</div>
+                          <h3>No events found</h3><p>Try adjusting your filters or search terms</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} onSave={handleSaveEvent} savedEvents={savedEvents} showToast={showToast} userLocation={userLocation} onViewVenue={handleViewVenue} venueProfiles={venueProfiles} />}
+                </div>
+              )}
+
+              {currentNav === "my-events" && user.type === "venue" && (
+                <div className="container">
+                  <div style={{ marginBottom: "24px" }}>
+                    <h2 style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "26px", fontWeight: "700", marginBottom: "16px" }}>My Events</h2>
+                    <button className="btn-primary" onClick={handleNavAdd}>New Event</button>
+                  </div>
+                  {myEvents.length === 0 ? (
+                    <div className="empty"><div style={{ fontFamily: "'Caveat', cursive", fontSize: "36px", marginBottom: "14px", color: "var(--tomato)" }}>nothing yet!</div><h3>No events yet</h3><p>Create your first event to get started</p></div>
+                  ) : (
+                    <div className="events-grid">
+                      {myEvents.map(event => {
+                        const catStyle = CAT_STYLES[event.category] || CAT_STYLES.other;
+                        return (
+                          <div key={event.id} className="card" style={{ position: "relative" }}>
+                            <div className="card-image-wrap">
+                              <img src={getPosterImage(event, venueProfiles)} alt={event.title} className="card-image" />
+                              <CardIconBadge category={event.category} />
+                            </div>
+                            <div className="card-content">
+                              <span className="card-cat-tag" style={{ background: catStyle.bg, color: catStyle.text }}>{CATEGORIES.find(c => c.id === event.category)?.label}</span>
+                              {event.sportType && <span className="sport-sub-tag">{SPORT_TYPES.find(s => s.id === event.sportType)?.label}</span>}
+                              <h3 className="card-title">{event.title}</h3>
+                              <div className="card-meta"><span>{formatDate(event.date).weekday}</span><span>{event.time}</span><span style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)", fontWeight: "700" }}>{event.price}</span></div>
+                              <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                                <button style={{ flex: 1, padding: "8px 14px", background: "var(--cream)", color: "var(--ink)", border: "2px solid var(--ink)", borderRadius: "100px", fontFamily: "'Fredoka', sans-serif", fontSize: "13px", fontWeight: "600", cursor: "pointer" }} onClick={() => { setEditingEvent(event); setShowAddEvent(true); }}>Edit</button>
+                                <button style={{ flex: 1, padding: "8px 14px", background: "var(--tomato)", color: "var(--cream)", border: "2px solid var(--ink)", borderRadius: "100px", fontFamily: "'Fredoka', sans-serif", fontSize: "13px", fontWeight: "600", cursor: "pointer" }} onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {currentNav === "profile" && user.type === "venue" && (
+                <div className="container">
+                  <EditVenueProfile user={user} profiles={venueProfiles} onSave={handleSaveProfile} onCancel={() => setView("grid")} />
+                </div>
+              )}
+
+              {currentNav === "saved" && (
+                <div className="container">
+                  <div style={{ marginBottom: "24px" }}>
+                    <h2 style={{ fontFamily: "'Fredoka', sans-serif", fontSize: "26px", fontWeight: "700", marginBottom: "6px" }}>Saved Events</h2>
+                    <p style={{ color: "var(--ink-soft)", fontSize: "14px" }}>Your collection of events to explore</p>
+                  </div>
+                  {savedEvents.length === 0 ? (
+                    <div className="empty"><SVGEmptySaveIcon /><h3>No saved events yet</h3><p>Explore events and save your favourites</p></div>
+                  ) : (
+                    <div className="events-grid">
+                      {savedEvents.map(event => {
+                        const catStyle = CAT_STYLES[event.category] || CAT_STYLES.other;
+                        return (
+                          <div key={event.id} className="card" onClick={() => setSelectedEvent(event)} style={{ cursor: "pointer" }}>
+                            <div className="card-image-wrap">
+                              <img src={getPosterImage(event, venueProfiles)} alt={event.title} className="card-image" />
+                              <CardIconBadge category={event.category} />
+                            </div>
+                            <div className="card-content">
+                              <span className="card-cat-tag" style={{ background: catStyle.bg, color: catStyle.text }}>{CATEGORIES.find(c => c.id === event.category)?.label}</span>
+                              {event.sportType && <span className="sport-sub-tag">{SPORT_TYPES.find(s => s.id === event.sportType)?.label}</span>}
+                              <h3 className="card-title">{event.title}</h3>
+                              <div className="card-meta"><span>{event.venue}</span><span>{formatDate(event.date).weekday}</span><span>{event.time}</span><span style={{ color: event.price === "Free" ? "var(--green)" : "var(--ink)", fontWeight: "700" }}>{event.price}</span></div>
+                              <div className="card-badges">
+                                <div className="card-badge" onClick={e => { e.stopPropagation(); handleSaveEvent(event); }} title="Remove"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {selectedEvent && <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} onSave={handleSaveEvent} savedEvents={savedEvents} showToast={showToast} userLocation={userLocation} onViewVenue={handleViewVenue} venueProfiles={venueProfiles} />}
+                </div>
+              )}
+            </>
+          )}
+
+          {viewingVenue && <VenueProfileModal venueName={viewingVenue.name} venueArea={viewingVenue.area} profiles={venueProfiles} onClose={() => setViewingVenue(null)} />}
+          {toast && <div className="toast">{toast}</div>}
+
+          <footer className="footer">
+            <div className="footer-links"><a href="#">About</a><a href="#">Venues</a><a href="#">Privacy</a><a href="#">Contact</a></div>
+            <p style={{ fontFamily: "'Fredoka', sans-serif", fontWeight: 600 }}>&copy; 2026 Keggo<span style={{ color: "var(--tomato)" }}>.</span> All rights reserved.</p>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
